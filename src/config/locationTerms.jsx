@@ -33,7 +33,7 @@ const locationTerms = {
   "Район (житловий)":   { ua: "р-н",                en: "District",          position: "suffix" },
   "Тупик":              { ua: "туп.",               en: "Dead end",     position: "suffix" },
   "Узвіз":              { ua: "уз.",                en: "Descent",      position: "suffix" },
-  "Центр міста":        { ua: "центр",              en: "City centre",  position: "suffix" },
+  "Центр міста":        { ua: "Центр міста",              en: "City centre",  position: "suffix" },
   "Шляхопровід":        { ua: "ш-д",                en: "Overpass",     position: "suffix" },
   "Шосе":               { ua: "ш.",                 en: "Highway",      position: "suffix" },
 };
