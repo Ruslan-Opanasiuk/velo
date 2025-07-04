@@ -1,0 +1,80 @@
+const RectConfigs = {
+  E3B1: {
+    outerHeight: 92,
+    outerWidth: 69,
+    outerRadius: 13.8,
+    strokeWidth: 7.66
+  },
+  E4B1: {
+    outerHeight: 92,
+    outerWidth: 99.66,
+    outerRadius: 13.8,
+    strokeWidth: 7.66
+  },
+  E3B4: {
+    outerHeight: 78,
+    outerWidth: 58.5,
+    outerRadius: 10.35,
+    strokeWidth: 5.75
+  },
+  E4B4: {
+    outerHeight: 78,
+    outerWidth: 84.5,
+    outerRadius: 10.35,
+    strokeWidth: 5.75
+  },
+  B1: {
+    outerHeight: 300,
+    outerWidth: 200,
+    outerRadius: 45,
+    strokeWidth: 10
+  },
+
+  B3: {
+    outerHeight: 400,
+    outerWidth: 200,
+    outerRadius: 45,
+    strokeWidth: 10
+  },
+  
+  B4: {
+    outerHeight: 350,
+    outerWidth: 600,
+    outerRadius: 45,
+    strokeWidth: 10
+  },
+  B5: {
+    outerHeight: 500,
+    outerWidth: 600,
+    outerRadius: 45,
+    strokeWidth: 10
+  },
+  B6: {
+    outerHeight: 650,
+    outerWidth: 600,
+    outerRadius: 45,
+    strokeWidth: 10
+  },
+
+  strokeB4: {
+    outerHeight: 340,
+    outerWidth: 590,
+    outerRadius: 45,
+    strokeWidth: 8
+  },
+  strokeB5: {
+    outerHeight: 490,
+    outerWidth: 590,
+    outerRadius: 45,
+    strokeWidth: 8
+  },
+  strokeB6: {
+    outerHeight: 640,
+    outerWidth: 590,
+    outerRadius: 45,
+    strokeWidth: 8
+  }
+
+}
+
+export default RectConfigs;
