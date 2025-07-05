@@ -19,11 +19,9 @@ function B4({ params }) {
   const isDoubleDigit = +params.routeNumber >= 10;
   const rectBadge = isDoubleDigit ? RectConfigs["E4B4"] : RectConfigs["E3B4"];
 
-  // ✅ Обираємо розміри залежно від кількості табличок
   const count = params.b4Items?.length || 1;
-  const outerRect = RectConfigs[`B${count + 3}`]; // B4, B5, B6
+  const outerRect = RectConfigs[`B${count + 3}`];
   const innerRect = RectConfigs[`strokeB${count + 3}`];
-
   const showBlackLine = params.tableType === "temporary";
 
   const bicycleScale = 86 / PathConfigs.bicycle.height;
@@ -44,6 +42,23 @@ function B4({ params }) {
       (params.numberType !== "none" ? 30 + badgeWidth : 0)) /
       2;
 
+  const b4ItemY = (index) => 200 + index * 150;
+
+  const renderSeparatorLines = () => {
+    const lines = [];
+    for (let i = 1; i < params.b4Items.length; i++) {
+      const prev = params.b4Items[i - 1];
+      const curr = params.b4Items[i];
+      if (prev.direction !== curr.direction) {
+        const y = b4ItemY(i) - 3;
+        lines.push(
+          <rect key={`line-${i}`} x={10} y={y} width={580} height={6} fill={"#000000"} />
+        );
+      }
+    }
+    return lines;
+  };
+
   return (
     <svg
       width={outerRect.outerWidth}
@@ -57,7 +72,6 @@ function B4({ params }) {
         x={0}
         y={0}
       />
-
       <RectRenderer
         config={innerRect}
         outerColor={"#000000"}
@@ -65,7 +79,6 @@ function B4({ params }) {
         x={5}
         y={5}
       />
-
       <path
         d={PathConfigs.topRoundedOuterRect.d}
         fill={params.tableType === "seasonal" ? "#FFFFFF" : tableBackground}
@@ -132,9 +145,20 @@ function B4({ params }) {
         )}
       </g>
 
-      {params.b4Items?.map((itemParams, index) => (
-        <B4Item key={index} params={itemParams} x={0} y={200 + index * 150} />
-      ))}
+      {params.b4Items?.map((itemParams, index) => {
+        const prev = index > 0 ? params.b4Items[index - 1] : null;
+        const hideArrow = prev && prev.direction === itemParams.direction;
+        return (
+          <B4Item
+            key={index}
+            params={{ ...itemParams, hideArrow }}
+            x={0}
+            y={b4ItemY(index)}
+          />
+        );
+      })}
+
+      {renderSeparatorLines()}
 
       {showBlackLine && (
         <rect x={10} y={197} width={580} height={6} fill={"#000000"} />

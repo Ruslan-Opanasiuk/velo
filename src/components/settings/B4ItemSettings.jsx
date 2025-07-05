@@ -6,9 +6,8 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
-  SelectValue,  
+  SelectValue,
 } from "../ui/select";
-
 
 function B4ItemSettings({ label, params, setParams }) {
   const handleDirectionChange = (value) => {
@@ -16,7 +15,16 @@ function B4ItemSettings({ label, params, setParams }) {
   };
 
   const handleIconChange = (value) => {
-    setParams({ ...params, icon: value });
+    setParams({ ...params, icon: value === "none" ? null : value });
+  };
+
+  const handleMainTextChange = (value) => {
+    const clearSubText = value === "Центр міста" || value === "Веломаршрут";
+    setParams({
+      ...params,
+      mainText: value,
+      subText: clearSubText ? "" : params.subText,
+    });
   };
 
   const directions = [
@@ -28,6 +36,7 @@ function B4ItemSettings({ label, params, setParams }) {
   ];
 
   const allowedIcons = [
+    "none",
     "cityCentre",
     "interchange",
     "port",
@@ -39,6 +48,7 @@ function B4ItemSettings({ label, params, setParams }) {
   ];
 
   const iconLabels = {
+    none: "Немає",
     cityCentre: "Центр міста",
     interchange: "Розв'язка",
     port: "Порт",
@@ -60,121 +70,121 @@ function B4ItemSettings({ label, params, setParams }) {
 
   return (
     <div className="bg-white border border-gray-300 p-6 shadow-md w-fit">
-    <p className="text-xl font-semibold mb-6 text-center">{label}</p>
+      <p className="text-xl font-semibold mb-6 text-center">{label}</p>
 
-    <div className="space-y-4">
-      {/* Назва */}
-      <div className="flex items-center gap-4">
-        <label className="w-24 font-medium">Назва:</label>
-        <div className="flex gap-2">
-          <Select
-            value={params.mainText}
-            onValueChange={(value) => setParams({ ...params, mainText: value })}
-          >
+      <div className="space-y-4">
+        {/* Назва */}
+        <div className="flex items-center gap-4">
+          <label className="w-24 font-medium">Назва:</label>
+          <div className="flex gap-2">
+            <Select value={params.mainText} onValueChange={handleMainTextChange}>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="Оберіть місце..." />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(locationTerms).map((key) => (
+                  <SelectItem key={key} value={key} title={key}>
+                    {key}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {!isCityCenter && !isRoute && (
+              <Input
+                type="text"
+                value={params.subText || ""}
+                onChange={(e) => setParams({ ...params, subText: e.target.value })}
+                placeholder="Додатковий текст..."
+                className="w-36"
+              />
+            )}
+
+            {isRoute && (
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="\d*"
+                value={params.routeNumber || ""}
+                onChange={(e) => setParams({ ...params, routeNumber: e.target.value })}
+                disabled={params.numberType === "eurovelo"}
+                placeholder="1–99"
+                className="w-36"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Напрямок */}
+        <div className="flex items-center gap-4">
+          <label className="w-24 font-medium">Напрямок:</label>
+          <Select value={params.direction} onValueChange={handleDirectionChange}>
             <SelectTrigger className="w-36">
-              <SelectValue placeholder="Оберіть місце..." />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Object.keys(locationTerms).map((key) => (
-                <SelectItem key={key} value={key} title={key}>
-                  {key}
-                </SelectItem>
-              ))}
+              {directions.map(({ value, label, icon }) => {
+                const rotation = B4ItemSettings.directionLayout[value]?.rotation || 0;
+                return (
+                  <SelectItem
+                    key={value}
+                    value={value}
+                    title={label}
+                    className="flex items-center justify-center"
+                  >
+                    <svg
+                      width={24}
+                      height={24}
+                      viewBox={`0 0 ${icon.width} ${icon.height}`}
+                      className="text-gray-700"
+                    >
+                      <path
+                        d={icon.d}
+                        fill="currentColor"
+                        transform={`rotate(${rotation} ${icon.width / 2} ${icon.height / 2}) scale(${icon.scale})`}
+                      />
+                    </svg>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
-
-          {!isCityCenter && !isRoute && (
-            <Input
-              type="text"
-              value={params.subText || ""}
-              onChange={(e) => setParams({ ...params, subText: e.target.value })}
-              placeholder="Додатковий текст..."
-              className="w-36"
-            />
-          )}
-
-          {isRoute && (
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="\d*"
-              value={params.routeNumber || ""}
-              onChange={(e) => setParams({ ...params, routeNumber: e.target.value })}
-              disabled={params.numberType === "eurovelo"}
-              placeholder="1–99"
-              className="w-36"
-            />
-          )}
         </div>
-      </div>
 
-      {/* Напрямок */}
-      <div className="flex items-center gap-4">
-        <label className="w-24 font-medium">Напрямок:</label>
-        <Select value={params.direction} onValueChange={handleDirectionChange}>
-          <SelectTrigger className="w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {directions.map(({ value, label, icon }) => {
-              const rotation = B4ItemSettings.directionLayout[value]?.rotation || 0;
-              return (
+        {/* Іконка */}
+        <div className="flex items-center gap-4">
+          <label className="w-24 font-medium">Іконка:</label>
+          <Select value={params.icon || "none"} onValueChange={handleIconChange}>
+            <SelectTrigger className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {iconOptions.map(({ value, label, icon }) => (
                 <SelectItem
                   key={value}
                   value={value}
                   title={label}
                   className="flex items-center justify-center"
                 >
-                  <svg
-                    width={24}
-                    height={24}
-                    viewBox={`0 0 ${icon.width} ${icon.height}`}
-                    className="text-gray-700"
-                  >
-                    <path
-                      d={icon.d}
-                      fill="currentColor"
-                      transform={`rotate(${rotation} ${icon.width / 2} ${icon.height / 2}) scale(${icon.scale})`}
-                    />
-                  </svg>
+                  {value !== "none" && icon ? (
+                    <svg
+                      width={24}
+                      height={24}
+                      viewBox={`0 0 ${icon.width} ${icon.height}`}
+                      className="text-gray-700"
+                    >
+                      <path d={icon.d} fill="currentColor" fillRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <span>{label}</span>
+                  )}
                 </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Іконка */}
-      <div className="flex items-center gap-4">
-        <label className="w-24 font-medium">Іконка:</label>
-        <Select value={params.icon || ""} onValueChange={handleIconChange}>
-          <SelectTrigger className="w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {iconOptions.map(({ value, label, icon }) => (
-              <SelectItem
-                key={value}
-                value={value}
-                title={label}
-                className="flex items-center justify-center"
-              >
-                <svg
-                  width={24}
-                  height={24}
-                  viewBox={`0 0 ${icon.width} ${icon.height}`}
-                  className="text-gray-700"
-                >
-                  <path d={icon.d} fill="currentColor" fillRule="evenodd" />
-                </svg>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
-  </div>
-
   );
 }
 
