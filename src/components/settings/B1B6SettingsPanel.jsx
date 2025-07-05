@@ -19,7 +19,8 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
       );
     }
 
-    if (params.tableType === "permanent") {
+    // ❌ Виняток для В4-В6 — не додаємо Eurovelo
+    if (params.tableType === "permanent" && !label.includes("В4") && !label.includes("В5") && !label.includes("В6")) {
       options.push(<option key="eurovelo" value="eurovelo">Eurovelo 4</option>);
     }
 
@@ -64,7 +65,6 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
     <div className="bg-white border border-gray-300 p-6 shadow-md">
       <p className="text-xl font-semibold mb-4">{label}</p>
 
-      {/* Тип таблички */}
       <label className="block mb-4">
         Призначення веломаршруту:
         <select
@@ -78,7 +78,6 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
         </select>
       </label>
 
-      {/* Тип номера маршруту */}
       <label className="block mb-4">
         Рівень веломаршруту:
         <select
@@ -90,7 +89,6 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
         </select>
       </label>
 
-      {/* Номер маршруту */}
       {params.numberType !== "none" && (
         <label className="block mb-4">
           Номер маршруту:
@@ -107,7 +105,6 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
         </label>
       )}
 
-      {/* Напрямок */}
       {enableDirection && (
         <label className="block">
           Напрямок:
