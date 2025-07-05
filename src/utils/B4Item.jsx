@@ -3,22 +3,22 @@ import PathConfigs from "../config/PathConfigs";
 import locationTerms from "../config/locationTerms";
 import measureText from "./measureText";
 
-// Масштабування шрифту під maxWidth, зі зменшенням не більше ніж 80%
 function scaleFontToFit(text, font, maxWidth, baseSize) {
   const measured = measureText(text, font);
   if (measured.width <= maxWidth) return { size: baseSize, ratio: 1 };
+
   const scaleRatio = maxWidth / measured.width;
   const clampedRatio = Math.max(scaleRatio, 0.8);
   return { size: baseSize * clampedRatio, ratio: clampedRatio };
 }
 
-// Розбивка тексту на два рядки
 function splitText(text) {
   const words = text.split(" ");
   if (words.length < 2) return [text];
   const half = Math.ceil(words.length / 2);
   return [words.slice(0, half).join(" "), words.slice(half).join(" ")];
 }
+
 function B4Item({ params, x = 0, y = 0, transform }) {
   const mainKey = params.mainText;
   const subInput = params.subText;
@@ -47,39 +47,39 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const icon = iconKey && PathConfigs[iconKey];
 
   const directionLayout = {
-    "left": { rotation: -90, arrowX: 30 + (arrow.height - arrow.width) / 2 },
-    "straight": { rotation: 0, arrowX: 30 },
-    "straight-left": { rotation: -45, arrowX: 27 },
-    "right": { rotation: 90, arrowX: 570 - arrow.width - (arrow.height - arrow.width) / 2 },
-    "straight-right": { rotation: 45, arrowX: 573 - arrow.width },
+    "left": { rotation: -90, arrowX: 30 + (arrow.height - arrow.width) / 2, iconX: 30 + arrow.height + 20 },
+    "straight": { rotation: 0, arrowX: 30, iconX: 30 + arrow.width + 20 },
+    "straight-left": { rotation: -45, arrowX: 27, iconX: 30 + 654 * arrow.scale + 20 },
+    "right": { rotation: 90, arrowX: 570 - arrow.width - (arrow.height - arrow.width) / 2, iconX: 30 },
+    "straight-right": { rotation: 45, arrowX: 573 - arrow.width, iconX: 30 },
   };
 
   const layout = directionLayout[params.direction || "straight"];
   const rotation = layout.rotation;
   const arrowX = layout.arrowX;
   const arrowY = 75 - arrow.height / 2;
+  const iconX = layout.iconX;
 
-  // 👇 обчислення X для іконки (з урахуванням відсутності стрілки)
-  let iconX = 30;
-  if (!params.hideArrow && ["left", "straight", "straight-left"].includes(params.direction)) {
-    let arrowVisualWidth = params.direction === "straight"
-      ? arrow.width
-      : params.direction === "left"
-        ? arrow.height
-        : 65.4;
-    iconX = arrowX + arrowVisualWidth + 20;
+  let textX = 30;
+  if (["left", "straight", "straight-left"].includes(params.direction)) {
+    let arrowVisualWidth = 0;
+    if (params.direction === "straight") arrowVisualWidth = arrow.width;
+    else if (params.direction === "left") arrowVisualWidth = arrow.height;
+    else if (params.direction === "straight-left") arrowVisualWidth = 65.4;
+    textX = arrowX + arrowVisualWidth + 20;
   }
 
-  // 👇 обчислення X для тексту
-  let textX = icon ? iconX + icon.width * icon.scale + 20 : iconX;
+  if (icon) {
+    textX += icon.width * icon.scale + 20;
+  }
 
-  // 📏 maxWidth
   let arrowRightStart = 570;
   if (params.direction === "right") {
     arrowRightStart = 600 - (arrow.height + 50);
   } else if (params.direction === "straight-right") {
     arrowRightStart = 600 - (65.4 + 50);
   }
+
   const maxWidth = arrowRightStart - textX;
 
   const baseFontSize1 = 38 / 0.7;
@@ -128,7 +128,6 @@ function B4Item({ params, x = 0, y = 0, transform }) {
         </tspan>
       </text>
 
-      {/* ➤ Стрілка */}
       {!params.hideArrow && (
         <g
           transform={`
@@ -141,7 +140,6 @@ function B4Item({ params, x = 0, y = 0, transform }) {
         </g>
       )}
 
-      {/* ⭕ Іконка */}
       {icon && (
         <g transform={`translate(${iconX}, ${75 - icon.height * icon.scale / 2}) scale(${icon.scale})`}>
           <path d={icon.d} fill="#000000" fillRule="evenodd" />
@@ -150,6 +148,5 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     </g>
   );
 }
-
 
 export default B4Item;

@@ -4,7 +4,7 @@ import svgr from "vite-plugin-svgr";
 import path from "path";
 
 export default defineConfig({
-  base: "/velo-signs/",
+  base: "/velo/",
   plugins: [react(), svgr()],
   resolve: {
     alias: {
