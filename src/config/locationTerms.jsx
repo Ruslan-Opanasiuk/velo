@@ -4,7 +4,7 @@ const locationTerms = {
   "Аеропорт":           { ua: "аероп.",             en: "airport",      position: "suffix" },
   "Алея":               { ua: "ал.",                en: "alley",        position: "suffix" },
   "Бульвар":            { ua: "бульв.",             en: "boulevard",    position: "suffix" },
-  "Веломаршрут":        { ua: "Веломаршрут",        en: "cycle road",   position: "suffix" },
+  "Веломаршрут":        { ua: "Веломаршрут",        en: "Сycle road",   position: "suffix" },
   "Водосховище":        { ua: "вдсх",               en: "reservoir",    position: "suffix" },
   "Вокзал":             { ua: "в-л",                en: "station",      position: "suffix" },
   "Станція":            { ua: "ст.",                en: "station",      position: "suffix" },

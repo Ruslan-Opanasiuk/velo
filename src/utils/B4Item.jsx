@@ -103,6 +103,7 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     <g transform={transform || `translate(${x}, ${y})`}>
       <rect x={30} y={35} width={540} height={80} fill="white" />
 
+
       <text>
         {firstLines.map((line, i) => (
           <tspan

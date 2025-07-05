@@ -146,8 +146,8 @@ function B4({ params }) {
       </g>
 
       {params.b4Items?.map((itemParams, index) => {
-        const next = index < params.b4Items.length - 1 ? params.b4Items[index + 1] : null;
-        const hideArrow = next && next.direction === itemParams.direction;
+        const prev = index > 0 ? params.b4Items[index - 1] : null;
+        const hideArrow = prev && prev.direction === itemParams.direction;
         return (
           <B4Item
             key={index}
@@ -157,6 +157,7 @@ function B4({ params }) {
           />
         );
       })}
+
 
       {renderSeparatorLines()}
 
