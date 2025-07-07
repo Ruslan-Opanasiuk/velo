@@ -1,25 +1,30 @@
 function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNoneOption }) {
+  // Генерує список опцій для вибору рівня маршруту (тип номеру)
   const getNumberTypeOptions = () => {
     const options = [];
 
+    // Якщо дозволено, додаємо опцію "Немає"
     if (allowNoneOption) {
       options.push(<option key="none" value="none">Немає</option>);
     }
 
+    // Опція "Національний" доступна, якщо маршрут не сезонний
     if (params.tableType !== "seasonal") {
       options.push(<option key="national" value="national">Національний</option>);
     }
 
+    // Для В2 показуємо одну комбіновану опцію
     if (label.includes("В2")) {
       options.push(<option key="regional-local" value="regional">Регіональний/Локальний</option>);
     } else {
+      // Інакше додаємо окремо "Регіональний" та "Локальний"
       options.push(
         <option key="regional" value="regional">Регіональний</option>,
         <option key="local" value="local">Локальний</option>
       );
     }
 
-    // ❌ Виняток для В4-В6 — не додаємо Eurovelo
+    // Eurovelo дозволений тільки для постійних маршрутів, окрім В4-В6
     if (params.tableType === "permanent" && !label.includes("В4") && !label.includes("В5") && !label.includes("В6")) {
       options.push(<option key="eurovelo" value="eurovelo">Eurovelo 4</option>);
     }
@@ -27,13 +32,17 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
     return options;
   };
 
+  // Коли змінюється тип таблички (постійний, сезонний тощо)
   const handleTableTypeChange = (e) => {
     const tableType = e.target.value;
     let numberType = params.numberType;
 
+    // Якщо вибрано сезонний тип — національний рівень не дозволений
     if (tableType === "seasonal" && numberType === "national") {
       numberType = "regional";
     }
+
+    // Eurovelo доступний лише для постійних маршрутів
     if (tableType !== "permanent" && numberType === "eurovelo") {
       numberType = "regional";
     }
@@ -41,8 +50,12 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
     setParams({ ...params, tableType, numberType });
   };
 
+  // Коли змінюється рівень маршруту (тип номеру)
   const handleNumberTypeChange = (e) => {
     const numberType = e.target.value;
+
+    // Автоматично підставляємо номер маршруту, якщо це Eurovelo (фіксовано 4)
+    // або очищаємо, якщо обрано "немає"
     const routeNumber =
       numberType === "eurovelo" ? "4" :
       numberType === "none" ? "" :
@@ -51,20 +64,36 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
     setParams({ ...params, numberType, routeNumber });
   };
 
+  // Обробка зміни номера маршруту
   const handleRouteNumberChange = (e) => {
-    let value = e.target.value.replace(/\D/g, "");
+    let value = e.target.value.replace(/\D/g, ""); // залишаємо лише цифри
 
-    if (value.startsWith("0")) value = value.slice(1);
-    if (params.numberType === "eurovelo") value = "4";
-    else value = value.slice(0, 2);
+    if (value.startsWith("0")) value = value.slice(1); // прибираємо початкові нулі
+
+    if (params.numberType === "eurovelo") value = "4"; // якщо Eurovelo — фіксоване значення
+    else value = value.slice(0, 2); // максимум 2 цифри
 
     setParams({ ...params, routeNumber: value });
+  };
+
+  // Обробка вибору кількості напрямів (для В4)
+  const handleRouteCountChange = (count) => {
+    const newItems = Array.from({ length: count }, (_, i) => {
+      return params.b4Items?.[i] || {
+        mainText: "",
+        subText: "",
+        direction: "straight",
+        routeNumber: "",
+      };
+    });
+    setParams({ ...params, b4Items: newItems });
   };
 
   return (
     <div className="bg-white border border-gray-300 p-6 shadow-md">
       <p className="text-xl font-semibold mb-4">{label}</p>
 
+      {/* Вибір типу таблички */}
       <label className="block mb-4">
         Призначення веломаршруту:
         <select
@@ -78,6 +107,7 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
         </select>
       </label>
 
+      {/* Вибір рівня маршруту (тип номеру) */}
       <label className="block mb-4">
         Рівень веломаршруту:
         <select
@@ -89,6 +119,7 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
         </select>
       </label>
 
+      {/* Введення номера маршруту — якщо опція не "немає" */}
       {params.numberType !== "none" && (
         <label className="block mb-4">
           Номер маршруту:
@@ -98,13 +129,14 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
             pattern="\\d*"
             value={params.routeNumber}
             onChange={handleRouteNumberChange}
-            disabled={params.numberType === "eurovelo"}
+            disabled={params.numberType === "eurovelo"} // Заборона редагування для Eurovelo
             className="w-full mt-1 p-2 border rounded"
-            placeholder="Введіть цифрове значення від 1 до 99"
+            placeholder="Введіть цифру від 1 до 99"
           />
         </label>
       )}
 
+      {/* Вибір напрямку, якщо це дозволено (для B1-B3) */}
       {enableDirection && (
         <label className="block">
           Напрямок:
@@ -120,6 +152,28 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
             <option value="straight-right">Прямо і праворуч</option>
           </select>
         </label>
+      )}
+
+      {/* Вибір кількості точок інтересу — тільки для В4 */}
+      {label.includes("В4") && (
+        <div className="mt-4">
+          <p className="mb-1 font-medium">Кількість напрямків</p>
+          <div className="inline-flex border rounded overflow-hidden">
+            {[1, 2, 3].map((num) => (
+              <button
+                key={num}
+                onClick={() => handleRouteCountChange(num)}
+                className={`px-4 py-2 border-r last:border-r-0 ${
+                  params.b4Items?.length === num
+                    ? "bg-gray-300 font-semibold"
+                    : "bg-white hover:bg-gray-100"
+                }`}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

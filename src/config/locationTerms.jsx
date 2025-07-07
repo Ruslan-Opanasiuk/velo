@@ -1,42 +1,102 @@
 const locationTerms = {
-  "Немає":               { ua: "",                 en: "",      position: "suffix" },
-  "Автобусн.":          { ua: "",                   en: "bus",          position: "prefix" },
-  "Аеропорт":           { ua: "аероп.",             en: "airport",      position: "suffix" },
-  "Алея":               { ua: "ал.",                en: "alley",        position: "suffix" },
-  "Бульвар":            { ua: "бульв.",             en: "boulevard",    position: "suffix" },
-  "Веломаршрут":        { ua: "Веломаршрут",        en: "Сycle road",   position: "suffix" },
-  "Водосховище":        { ua: "вдсх",               en: "reservoir",    position: "suffix" },
-  "Вокзал":             { ua: "в-л",                en: "station",      position: "suffix" },
-  "Станція":            { ua: "ст.",                en: "station",      position: "suffix" },
-  "Селище, хутір":      { ua: "",                   en: "hamlet",       position: "suffix" },
-  "Село":               { ua: "",                   en: "village",      position: "suffix" },
-  "Вулиця":             { ua: "вул.",               en: "street",       position: "suffix" },
-  "Дорога":             { ua: "",                   en: "road",         position: "suffix" },
-  "Залізничн.":         { ua: "",                   en: "railway",      position: "suffix" },
-  "Канал":              { ua: "кан.",               en: "canal",        position: "suffix" },
-  "Лінія":              { ua: "",              en: "line",         position: "suffix" },
-  "Лиман":              { ua: "",                en: "estuary",          position: "suffix" },
-  "Майдан":             { ua: "Майдан",             en: "square",       position: "prefix" },
-  "Масив (житловий)":   { ua: "ж/м",                en: "housing estate",          position: "suffix" },
-  "Міська електричка":  { ua: "",  en: "urban rail",   position: "prefix" },
-  "Місто":              { ua: "",                   en: "city",         position: "suffix" },
-  "Міст":               { ua: "м.",                 en: "bridge",       position: "suffix" },
-  "Набережна":          { ua: "наб.",               en: "embankment",   position: "suffix" },
-  "Озеро":              { ua: "оз.",                en: "lake",         position: "suffix" },
-  "Острів":             { ua: "о-в",                en: "island",       position: "suffix" },
-  "Парк":               { ua: "Парк",               en: "park",         position: "prefix" },
-  "Сквер":              { ua: "Сквер",              en: "park",         position: "prefix" },
-  "Провулок":           { ua: "пров.",              en: "lane",         position: "suffix" },
-  "Площа":              { ua: "пл.",                en: "square",       position: "suffix" },
-  "Проїзд":             { ua: "пр-д",               en: "passage",      position: "suffix" },
-  "Проспект":           { ua: "просп.",             en: "avenue",       position: "suffix" },
-  "Річка":              { ua: "р.",                 en: "river",        position: "suffix" },
-  "Район (житловий)":   { ua: "р-н",                en: "district",          position: "suffix" },
-  "Тупик":              { ua: "туп.",               en: "dead end",     position: "suffix" },
-  "Узвіз":              { ua: "уз.",                en: "descent",      position: "suffix" },
-  "Центр міста":        { ua: "Центр міста",              en: "Сity сentre",  position: "suffix" },
-  "Шляхопровід":        { ua: "ш-д",                en: "overpass",     position: "suffix" },
-  "Шосе":               { ua: "ш.",                 en: "highway",      position: "suffix" },
-};
+  "cityCentre": {
+      "Центр міста": {"ua": "Центр міста", "en": "Сity centre"},
+      "Центр села": {"ua": "Центр села", "en": "Village centre"},
+      "Центр селища": {"ua": "Центр селища", "en": "Hamlet centre"},
+      "Центр громади": {"ua": "Центр громади", "en": "Hromada centre"}
+  },
+  "interchange": {
+      "Шляхопровід": {"ua": "ш-д.", "en": "overpass"},
+      "Естакада": {"ua": "ест.", "en": "flyover"},
+      "Площа": {"ua": "пл.", "en": "square"},
+      "Майдан": {"ua": "майд.", "en": "square"}
+  },
+  "bridge": {
+      "Мостовий перехід": {"ua": "м-п.", "en": "overpass"},
+      "Акведук": {"ua": "акв.", "en": "aqueduct"},
+      "Віадук": {"ua": "Віадук", "en": "viaduct"},
+      "Дамба": {"ua": "дамб.", "en": "dam"},
+      "Тунель": {"ua": "тнл.", "en": "tunnel"},
+      "Підземний перехід": {"ua": "перехід", "en": "underpass"},
+      "Міст": {"ua": "м.", "en": "bridge"}
+  },
+  "port": {
+      "Річковий порт": {"ua": "річ.порт", "en": "river port"},
+      "Морський порт": {"ua": "мор.порт", "en": "port"},
+      "Річковий вокзал/станція": {"ua": "р.ст.", "en": "river station"},
+      "Човникова станція": {"ua": "човн.ст.", "en": "boat station"},
+      "Водна станція": {"ua": "вод.ст.", "en": "boat station"},
+      "Причал": {"ua": "прич.", "en": "berth"},
+      "Пристань": {"ua": "прист.", "en": "pier"},
+      "Поромна переправа": {"ua": "пором.", "en": "ferry"}
+  },
+  "airport": {
+      "Аеродром (Летовище)": {"ua": "аерод.", "en": "airfield"},
+      "Аеропорт": {"ua": "аерп.", "en": "airport"}
+  },
+  "settlement": {
+      "Місто": {"ua": "", "en": "city"},
+      "Село": {"ua": "", "en": "village"},
+      "Селище": {"ua": "", "en": "hamlet"},
+      "Хутір": {"ua": "хут.", "en": "khutor"}
+  },
+  "railStation": {
+      "Залізнична станція": {"ua": "зал.ст.", "en": "train station"},
+      "Залізничний вокзал": {"ua": "зал.вкз.", "en": "railway station"},
+      "Станція метро": {"ua": "ст.м.", "en": "metro station"}
+  },
+  "busStation": {
+      "Автостанція": {"ua": "авт.ст.", "en": "bus station"},
+      "Автовокзал": {"ua": "авт.вкз.", "en": "bus station"}
+  },
+  "water": {
+      "Водосховище": {"ua": "в/сх.", "en": "reservoir"},
+      "Гребля": {"ua": "гр.", "en": "levee"},
+      "Канал": {"ua": "кан.", "en": "canal"},
+      "Лиман": {"ua": "лим.", "en": "firth"},
+      "Річка": {"ua": "р.", "en": "river"},
+      "Озеро": {"ua": "оз.", "en": "lake"},
+      "Ставок": {"ua": "став.", "en": "pond"},
+      "Залив": {"ua": "зал.", "en": "bay"},
+      "Протока": {"ua": "прот.", "en": "strait"},
+      "Джерело": {"ua": "джер.", "en": "spring water"},
+      "Пляж": {"ua": "", "en": "beach"},
+      "Гавань": {"ua": "гав.", "en": "harbor"},
+      "Бухта": {"ua": "бух.", "en": "bay"},
+      "Струмок": {"ua": "струм.", "en": "creek"},
+      "Затока": {"ua": "зат.", "en": "gulf"}
+  },
+  "streetNetwork": {
+      "Вулиця": {"ua": "вул.", "en": "street"},
+      "Алея": {"ua": "ал.", "en": "alley"},
+      "Бульвар": {"ua": "бульв.", "en": "boulevard"},
+      "Шлях": {"ua": "", "en": "road"},
+      "Узвіз": {"ua": "уз.", "en": "descent"},
+      "Тупик": {"ua": "туп.", "en": "dead end"},
+      "Проспект": {"ua": "просп.", "en": "avenue"},
+      "Проїзд": {"ua": "пр.", "en": "passage"},
+      "Площа": {"ua": "пл.", "en": "square"},
+      "Майдан": {"ua": "майд.", "en": "square"},
+      "Провулок": {"ua": "пров.", "en": "lane"},
+      "Шосе": {"ua": "ш.", "en": "highway"},
+      "Пасаж": {"ua": "", "en": "passage"},
+      "Дорога": {"ua": "", "en": "road"},
+      "Набережна": {"ua": "наб.", "en": "embankment"},
+      "Лінія": {"ua": "", "en": "line"},
+      "Автомагістраль (автосрада)": {"ua": "", "en": "highroad"}
+  },
+  "district": {
+      "Житловий квартал (комплекс)": {"ua": "ЖК", "en": "residential complex"},
+      "Житловий масив": {"ua": "ж/м", "en": "housing estate"},
+      "Житловий район": {"ua": "р-н", "en": "district"},
+      "Сади (садові ділянки)": {"ua": "сад.діл.", "en": "allotment"}
+  },
+  "bicycleRoute": {
+      "Національний": {"ua": "Веломаршрут", "en": "Cycle road"},
+      "Регіональний": {"ua": "Веломаршрут", "en": "Cycle road"},
+      "Локальний": {"ua": "Веломаршрут", "en": "Cycle road"},
+  },
+  "other": {}
+}
 
 export default locationTerms;

@@ -41,26 +41,6 @@ function App() {
     setParams({ ...params, b4Items: updatedItems });
   };
 
-  const addB4Item = () => {
-    setParams({
-      ...params,
-      b4Items: [
-        ...params.b4Items,
-        {
-          mainText: "",
-          subText: "",
-          direction: "straight",
-          routeNumber: "",
-        },
-      ],
-    });
-  };
-
-  const removeB4Item = (indexToRemove) => {
-    const filtered = params.b4Items.filter((_, index) => index !== indexToRemove);
-    setParams({ ...params, b4Items: filtered });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 text-center p-6">
       <h1 className="text-3xl font-bold mb-6">Конструктор Велосипедного маршрутного орієнтування</h1>
@@ -85,31 +65,13 @@ function App() {
 
           {isB4 &&
             params.b4Items.map((item, index) => (
-              <div key={index} className="relative">
-                <B4ItemSettings
-                  label={`Напрям ${index + 1}`}
-                  params={item}
-                  setParams={(newItem) => updateB4Item(index, newItem)}
-                />
-                {params.b4Items.length > 1 && (
-                  <button
-                    onClick={() => removeB4Item(index)}
-                    className="absolute top-1 right-1 text-gray-500 hover:text-red-600 text-xl leading-none"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
+              <B4ItemSettings
+                key={index}
+                label={`Напрям ${index + 1}`}
+                params={item}
+                setParams={(newItem) => updateB4Item(index, newItem)}
+              />
             ))}
-
-          {isB4 && params.b4Items && params.b4Items.length < 3 && (
-            <button
-              onClick={addB4Item}
-              className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
-            >
-              Додати напрям
-            </button>
-          )}
         </div>
       </div>
 
