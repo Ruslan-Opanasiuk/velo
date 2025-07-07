@@ -45,7 +45,7 @@ function B2({ params }) {
             outerColor={tableBg}
             innerColor={"#989898"}
             cx={mainConfig.outerWidth / 2}
-            cy={160 + circleConfig.outerRadius}
+            cy={160 + circleConfig.outerRadius - 4}
           />
         ) : (
           <RectRenderer
@@ -71,7 +71,7 @@ function B2({ params }) {
           outerColor={tableBg}
           innerColor={"none"}
           cx={mainConfig.outerWidth/2}
-          cy={160 + circleConfig.outerRadius}
+          cy={160 + circleConfig.outerRadius - 4}
         />
       ) : params.numberType === "eurovelo" ? (
         <path
@@ -104,7 +104,7 @@ function B2({ params }) {
         x={mainConfig.outerWidth/2}
         y={160 + rectConfig.outerHeight/2 + 6} //ПІДПРАВИТИ
         fill={textColor}
-        fontSize={(params.numberType === "national" ? 40 : 45) / 0.7}
+        fontSize={(params.numberType === "national" ? 42 : 45) / 0.7}
         fontFamily="RoadUA-Bold"
         textAnchor="middle"
         dominantBaseline="middle"

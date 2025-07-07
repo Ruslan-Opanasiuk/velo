@@ -62,7 +62,7 @@ function B3({ params }) {
           outerColor={tableBg}
           innerColor={numberBg}
           cx={mainConfig.outerWidth / 2}
-          cy={144 + circleConfig.outerRadius}
+          cy={144 + circleConfig.outerRadius - 4}
         />
       ) : params.numberType === "eurovelo" ? (
         <path
@@ -88,7 +88,7 @@ function B3({ params }) {
         x={mainConfig.outerWidth / 2}
         y={144 + rectConfig.outerHeight / 2 + 7}
         fill={textColor}
-        fontSize={(params.numberType === "national" ? 40 : 45) / 0.7}
+        fontSize={(params.numberType === "national" ? 42 : 45) / 0.7}
         fontFamily="RoadUA-Bold"
         textAnchor="middle"
         dominantBaseline="middle"

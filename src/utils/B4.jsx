@@ -7,43 +7,48 @@ import CircleConfigs from "../config/CircleConfigs";
 import { ColorMap } from "../config/ColorMap";
 
 function B4({ params }) {
+
+  const xPadding = 40;
+  const paddingX = 560;
+  
+
+  // Отримуємо кольори фону та тексту з мапи
   const { table, number } = ColorMap;
   const { bg: tableBackground, fg: tableForeground } = table[params.tableType];
-  const { bg: badgeBackground } = number[params.numberType] || {};
-  const textColor =
-    params.tableType === "seasonal"
-      ? "#F5C30D"
-      : number[params.numberType]?.text;
+  const { bg: badgeBackground, text: textColor } = number[params.numberType] || {};
 
   const circleBadge = CircleConfigs["E5B4"];
   const isDoubleDigit = +params.routeNumber >= 10;
   const rectBadge = isDoubleDigit ? RectConfigs["E4B4"] : RectConfigs["E3B4"];
 
   const count = params.b4Items?.length || 1;
+
+  // Конфігурації розміру таблички для 1, 2 або 3 напрямків
   const outerRect = RectConfigs[`B${count + 3}`];
   const innerRect = RectConfigs[`strokeB${count + 3}`];
+
   const showBlackLine = params.tableType === "temporary";
 
   const bicycleScale = 86 / PathConfigs.bicycle.height;
-  const euroveloScale = 100 / PathConfigs.eurovelo.height;
 
+  // Визначення ширини бейджа маршруту залежно від типу
   const badgeWidth =
     params.numberType === "none"
       ? 0
       : params.numberType === "national"
       ? circleBadge.outerRadius * 2
-      : params.numberType === "eurovelo"
-      ? PathConfigs.eurovelo.width * euroveloScale
       : rectBadge.outerWidth;
 
+  // Центрування всього блоку піктограма + маршрут
   const groupX =
     300 -
     (PathConfigs.bicycle.width * bicycleScale +
-      (params.numberType !== "none" ? 30 + badgeWidth : 0)) /
-      2;
+      (params.numberType !== "none" ? 30 + badgeWidth : 0)) / 2;
 
+  // Позиції кожного B4Item
   const b4ItemY = (index) => 200 + index * 150;
 
+  // Вставки чорних ліній між напрямками з різними стрілками
   const renderSeparatorLines = () => {
     const lines = [];
     for (let i = 1; i < params.b4Items.length; i++) {
@@ -65,6 +70,7 @@ function B4({ params }) {
       height={outerRect.outerHeight}
       xmlns="http://www.w3.org/2000/svg"
     >
+      {/* Зовнішній білий контур */}
       <RectRenderer
         config={outerRect}
         outerColor={"#FFFFFF"}
@@ -72,6 +78,7 @@ function B4({ params }) {
         x={0}
         y={0}
       />
+      {/* Внутрішній чорний контур */}
       <RectRenderer
         config={innerRect}
         outerColor={"#000000"}
@@ -79,13 +86,20 @@ function B4({ params }) {
         x={5}
         y={5}
       />
+
+      {/* Верхня заокруглена частина */}
       <path
         d={PathConfigs.topRoundedOuterRect.d}
         fill={params.tableType === "seasonal" ? "#FFFFFF" : tableBackground}
       />
       <path d={PathConfigs.topRoundedInnerRect.d} fill={tableForeground} />
 
+
+
+
+      {/* Іконка велосипеда + маршрут */}
       <g transform={`translate(${groupX}, 5)`}>
+        {/* Іконка велосипеда */}
         <path
           d={PathConfigs.bicycle.d}
           fill={tableBackground}
@@ -95,8 +109,10 @@ function B4({ params }) {
           }) scale(${bicycleScale})`}
         />
 
+        {/* Бейдж з номером маршруту */}
         {params.numberType !== "none" && (
           <g transform={`translate(${PathConfigs.bicycle.width * bicycleScale + 30}, 0)`}>
+            {/* Якщо тип — національний — малюємо коло */}
             {params.numberType === "national" ? (
               <CircleRenderer
                 config={circleBadge}
@@ -105,35 +121,27 @@ function B4({ params }) {
                 cx={circleBadge.outerRadius}
                 cy={100}
               />
-            ) : params.numberType === "eurovelo" ? (
-              <path
-                d={PathConfigs.eurovelo.d}
-                fill={badgeBackground}
-                transform={`translate(0, ${
-                  100 - (PathConfigs.eurovelo.height * euroveloScale) / 2
-                }) scale(${euroveloScale})`}
-              />
             ) : (
+              // Інакше прямокутник
               <RectRenderer
                 config={rectBadge}
                 outerColor={tableBackground}
                 innerColor={badgeBackground}
                 x={0}
-                y={100 - rectBadge.outerHeight / 2}
+                y={100 - rectBadge.outerHeight / 2 + 5}
               />
             )}
 
+            {/* Текст номера */}
             <text
               x={
                 params.numberType === "national"
                   ? circleBadge.outerRadius
-                  : params.numberType === "eurovelo"
-                  ? (PathConfigs.eurovelo.width * euroveloScale) / 2
                   : rectBadge.outerWidth / 2
               }
-              y={105}
+              y={(params.numberType === "national" ? 105 : 110)}
               fill={textColor}
-              fontSize={(params.numberType === "national" ? 36 : 41) / 0.7}
+              fontSize={(params.numberType === "national" ? 38 : 41) / 0.7}
               fontFamily="RoadUA-Bold"
               textAnchor="middle"
               dominantBaseline="middle"
@@ -145,6 +153,10 @@ function B4({ params }) {
         )}
       </g>
 
+
+
+
+      {/* Напрямки В4 */}
       {params.b4Items?.map((itemParams, index) => {
         const prev = index > 0 ? params.b4Items[index - 1] : null;
         const hideArrow = prev && prev.direction === itemParams.direction;
@@ -158,9 +170,10 @@ function B4({ params }) {
         );
       })}
 
-
+      {/* Роздільники між стрілками */}
       {renderSeparatorLines()}
 
+      {/* Чорна смуга під верхнім блоком, якщо тип "temporary" */}
       {showBlackLine && (
         <rect x={10} y={197} width={580} height={6} fill={"#000000"} />
       )}

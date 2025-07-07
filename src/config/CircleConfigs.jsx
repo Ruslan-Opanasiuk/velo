@@ -1,12 +1,10 @@
 const CircleConfigs = {
   E5B1: {
-    outerRadius: 46,
-    innerRadius: 38.34,
+    outerRadius: 50,
     strokeWidth: 7.66
   },
   E5B4: {
-    outerRadius: 39,
-    innerRadius: 32.5,
+    outerRadius: 43,
     strokeWidth: 5.75
   }
 }

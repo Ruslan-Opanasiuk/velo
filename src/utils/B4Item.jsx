@@ -5,6 +5,7 @@ import measureText from "./measureText";
 
 // Масштабування шрифта відповідно до максимальної ширини
 function scaleFontToFit(text, font, maxWidth, baseSize) {
+
   const measured = measureText(text, font);
   if (measured.width <= maxWidth) return { size: baseSize, ratio: 1 };
 
@@ -23,6 +24,10 @@ function splitText(text) {
 
 // Основний компонент В4-напрямку
 function B4Item({ params, x = 0, y = 0, transform }) {
+
+  const xPadding = 40;
+  const paddingX = 560;
+
   const mainKey = params.mainText;
   const subInput = params.subText;
 
@@ -67,11 +72,11 @@ function B4Item({ params, x = 0, y = 0, transform }) {
 
   // Позиціонування стрілки та іконки
   const directionLayout = {
-    "left": { rotation: -90, arrowX: 30 + (arrow.height - arrow.width) / 2, iconX: 30 + arrow.height + 20 },
-    "straight": { rotation: 0, arrowX: 30, iconX: 30 + arrow.width + 20 },
-    "straight-left": { rotation: -45, arrowX: 27, iconX: 30 + 654 * arrow.scale + 20 },
-    "right": { rotation: 90, arrowX: 570 - arrow.width - (arrow.height - arrow.width) / 2, iconX: 30 },
-    "straight-right": { rotation: 45, arrowX: 573 - arrow.width, iconX: 30 },
+    "left": {           rotation: -90,  arrowX: xPadding + (arrow.height - arrow.width) / 2,                iconX: xPadding + arrow.height + 20 },
+    "straight": {       rotation: 0,    arrowX: xPadding,                                                   iconX: xPadding + arrow.width + 20 },
+    "straight-left": {  rotation: -45,  arrowX: xPadding-3,                                                 iconX: xPadding + 654 * arrow.scale + 20 },
+    "right": {          rotation: 90,   arrowX: paddingX - arrow.width - (arrow.height - arrow.width) / 2,  iconX: xPadding },
+    "straight-right": { rotation: 45,   arrowX: paddingX + 3 - arrow.width,                                 iconX: xPadding },
   };
 
   const layout = directionLayout[params.direction || "straight"];
@@ -80,7 +85,7 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const arrowY = 75 - arrow.height / 2;
   const iconX = layout.iconX;
 
-  let textX = 30;
+  let textX = 40;
   if (["left", "straight", "straight-left"].includes(params.direction)) {
     let arrowVisualWidth = 0;
     if (params.direction === "straight") arrowVisualWidth = arrow.width;
@@ -94,10 +99,10 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   }
 
   const arrowRightStart = params.direction === "right"
-    ? 600 - (arrow.height + 50)
+    ? 600 - (arrow.height + 20 + xPadding)
     : params.direction === "straight-right"
-      ? 600 - (65.4 + 50)
-      : 570;
+      ? 600 - (65.4 + 20 + xPadding)
+      : paddingX;
   const maxWidth = arrowRightStart - textX;
 
   const baseFontSize1 = 38 / 0.7;
@@ -118,7 +123,7 @@ function B4Item({ params, x = 0, y = 0, transform }) {
 
   return (
     <g transform={transform || `translate(${x}, ${y})`}>
-      <rect x={30} y={35} width={540} height={80} fill="white" />
+      <rect x={xPadding} y={35} width={520} height={80} fill="white" />
 
       <text>
         {firstLines.map((line, i) => (
