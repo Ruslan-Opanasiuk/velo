@@ -6,10 +6,8 @@ import RouteBadgeGroup from "../components/svg/RouteBadgeGroup";
 
 // Масштабування шрифта відповідно до максимальної ширини
 function scaleFontToFit(text, font, maxWidth, baseSize) {
-
   const measured = measureText(text, font);
   if (measured.width <= maxWidth) return { size: baseSize, ratio: 1 };
-
   const scaleRatio = maxWidth / measured.width;
   const clampedRatio = Math.max(scaleRatio, 0.8);
   return { size: baseSize * clampedRatio, ratio: clampedRatio };
@@ -25,14 +23,10 @@ function splitText(text) {
 
 // Основний компонент В4-напрямку
 function B4Item({ params, x = 0, y = 0, transform }) {
-
   const xPadding = 40;
-  const paddingX = 560;
-
   const mainKey = params.mainText;
   const subInput = params.subText;
 
-  // Визначаємо українське скорочення і англійський відповідник
   let shortUa = "";
   let rawLabel = "";
 
@@ -48,17 +42,13 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const original = subInput || "";
   const translit = subInput ? transliterate(subInput) : "";
 
-  // Верхній рядок (укр)
   const firstLineRaw = shortUa ? `${shortUa} ${original}`.trim() : original;
-
-  // Нижній рядок (англ)
   const secondLineRaw = translit && rawLabel
     ? `${translit} ${rawLabel}`.trim()
     : translit || rawLabel || "";
 
   const arrow = PathConfigs.smallArrow;
 
-  // Визначення піктограми (з урахуванням прапорця "є центром")
   let iconKey = params.icon;
   if (iconKey === "streetNetwork" && params.isUrbanCenter) {
     iconKey = "cityCentre";
@@ -71,13 +61,12 @@ function B4Item({ params, x = 0, y = 0, transform }) {
 
   const icon = iconKey && PathConfigs[iconKey];
 
-  // Позиціонування стрілки та іконки
   const directionLayout = {
-    "left": {           rotation: -90,  arrowX: xPadding + (arrow.height - arrow.width) / 2,                iconX: xPadding + arrow.height + 20 },
-    "straight": {       rotation: 0,    arrowX: xPadding,                                                   iconX: xPadding + arrow.width + 20 },
-    "straight-left": {  rotation: -45,  arrowX: xPadding-3,                                                 iconX: xPadding + 654 * arrow.scale + 20 },
-    "right": {          rotation: 90,   arrowX: paddingX - arrow.width - (arrow.height - arrow.width) / 2,  iconX: xPadding },
-    "straight-right": { rotation: 45,   arrowX: paddingX + 3 - arrow.width,                                 iconX: xPadding },
+    "left": { rotation: -90, arrowX: xPadding + (arrow.height - arrow.width) / 2, iconX: xPadding + arrow.height + 20 },
+    "straight": { rotation: 0, arrowX: xPadding, iconX: xPadding + arrow.width + 20 },
+    "straight-left": { rotation: -45, arrowX: xPadding - 3, iconX: xPadding + 654 * arrow.scale + 20 },
+    "right": { rotation: 90, arrowX: 560 - arrow.width - (arrow.height - arrow.width) / 2, iconX: xPadding },
+    "straight-right": { rotation: 45, arrowX: 560 + 3 - arrow.width, iconX: xPadding },
   };
 
   const layout = directionLayout[params.direction || "straight"];
@@ -100,33 +89,28 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     textX += icon.width * icon.scale + 20;
   }
 
-  const arrowRightStart = params.direction === "right"
-    ? 600 - (arrow.height + 20 + xPadding)
-    : params.direction === "straight-right"
-      ? 600 - (65.4 + 20 + xPadding)
-      : paddingX;
-  const maxWidth = arrowRightStart - textX;
-
   const baseFontSize1 = 38 / 0.7;
   const baseFontSize2 = 20 / 0.7;
 
   let firstLines = [firstLineRaw];
-  let { size: fontSize1, ratio } = scaleFontToFit(firstLineRaw, `54px RoadUA-Medium`, maxWidth, baseFontSize1);
+  let { size: fontSize1, ratio } = scaleFontToFit(firstLineRaw, `54px RoadUA-Medium`, 520, baseFontSize1);
   if (ratio <= 0.8) {
     firstLines = splitText(firstLineRaw);
     const sizes = firstLines.map(line =>
-      scaleFontToFit(line, `54px RoadUA-Medium`, maxWidth, baseFontSize1)
+      scaleFontToFit(line, `54px RoadUA-Medium`, 520, baseFontSize1)
     );
     const minRatio = Math.min(...sizes.map(s => s.ratio));
     fontSize1 = baseFontSize1 * minRatio;
   }
 
-  const { size: fontSize2 } = scaleFontToFit(secondLineRaw, `28px RoadUA-Medium`, maxWidth, baseFontSize2);
+  const { size: fontSize2 } = scaleFontToFit(secondLineRaw, `28px RoadUA-Medium`, 520, baseFontSize2);
 
+  const measuredText = measureText(firstLines.join(" "), `${fontSize1}px RoadUA-Medium`);
+  const routeBadgeX = textX + measuredText.width + 20;
 
   return (
     <g transform={transform || `translate(${x}, ${y})`}>
-      <rect x={xPadding} y={35} width={520} height={80} fill="green" />
+      <rect x={xPadding} y={35} width={520} height={80} fill="white" />
 
       <text>
         {firstLines.map((line, i) => (
@@ -170,11 +154,10 @@ function B4Item({ params, x = 0, y = 0, transform }) {
         </g>
       )}
 
-
       <RouteBadgeGroup
-        params={{...params}}
-        x = {xPadding}
-        y = {35}      
+        params={{ ...params }}
+        x={routeBadgeX}
+        y={35}
       />
     </g>
   );

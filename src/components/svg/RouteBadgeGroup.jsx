@@ -7,28 +7,27 @@ import { ColorMap } from "../../config/ColorMap";
 
 function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
   const { table, number } = ColorMap;
-
   const spacing = 20;
-  let currentX = 0;
+  const elements = [];
 
-  const isDoubleDigit = +params.routeNumber >= 10;
-  const RectConfig = isDoubleDigit ? RectConfigs["E4B4text"] : RectConfigs["E3B4text"];
-  const CircleConfig = CircleConfigs["E5B4text"];
-
-  // === НОВЕ: визначаємо тип маршруту з mainText ===
   const categoryToType = {
     "Локальний": "local",
     "Регіональний": "regional",
     "Національний": "national",
   };
   const routeType = categoryToType[params.mainText];
-  const { bg: tableBackground } = table[params.tableType] || {};
+  const routeNumberValid = !!params.routeNumber;
+
+  const { bg: tableBackground } = table[params.tableType] || { bg: "#ffffff" };
   const { bg: badgeBackground, text: textColor } = number[routeType] || {};
-  const renderRouteNumber = !!routeType;
 
-  const elements = [];
+  const isDoubleDigit = +params.routeNumber >= 10;
+  const RectConfig = isDoubleDigit ? RectConfigs["E4B4text"] : RectConfigs["E3B4text"];
+  const CircleConfig = CircleConfigs["E5B4text"];
 
-  if (renderRouteNumber) {
+  let currentX = 0;
+
+  if (routeType && routeNumberValid) {
     elements.push(
       <g key="badge" transform={`translate(${currentX}, 0)`}>
         {routeType === "national" ? (
@@ -49,16 +48,8 @@ function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
           />
         )}
         <text
-          x={
-            routeType === "national"
-              ? CircleConfig.outerRadius
-              : RectConfig.outerWidth / 2
-          }
-          y={
-            routeType === "national"
-              ? CircleConfig.outerRadius + 3
-              : RectConfig.outerHeight / 2 + 3
-          }
+          x={routeType === "national" ? CircleConfig.outerRadius : RectConfig.outerWidth / 2}
+          y={routeType === "national" ? CircleConfig.outerRadius + 3 : RectConfig.outerHeight / 2 + 3}
           fill={textColor}
           fontSize={(routeType === "national" ? 22 : 25) / 0.7}
           fontFamily="RoadUA-Bold"
@@ -70,7 +61,6 @@ function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
         </text>
       </g>
     );
-
     currentX += routeType === "national"
       ? CircleConfig.outerRadius * 2
       : RectConfig.outerWidth;
@@ -108,7 +98,6 @@ function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
         </text>
       </g>
     );
-
     currentX += euroveloConfig.outerWidth + spacing;
   }
 
