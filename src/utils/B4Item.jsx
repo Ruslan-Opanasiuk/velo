@@ -116,7 +116,6 @@ function B4Item({ params, x = 0, y = 0, transform }) {
             x={textX}
             y={30 + i * fontSize1}
             fontSize={fontSize1}
-            dominantBaseline="hanging"
             fontFamily="RoadUA-Medium"
           >
             {line}
@@ -126,7 +125,6 @@ function B4Item({ params, x = 0, y = 0, transform }) {
           x={textX}
           y={120 + (firstLines.length - 1) * fontSize1}
           fontSize={fontSize2}
-          dominantBaseline="text-after-edge"
           fontFamily="RoadUA-Medium"
         >
           {secondLineRaw}
