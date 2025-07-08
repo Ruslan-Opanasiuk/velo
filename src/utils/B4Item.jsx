@@ -107,14 +107,14 @@ function B4Item({ params, x = 0, y = 0, transform }) {
 
   return (
     <g transform={transform || `translate(${x}, ${y})`}>
-      <rect x={xPadding} y={35} width={520} height={80} fill="white" />
+      <rect x={xPadding} y={35} width={520} height={80} fill="green" />
 
       <text>
         {firstLines.map((line, i) => (
           <tspan
             key={i}
             x={textX}
-            y={30 + i * fontSize1}
+            y={35 + 38 + i * fontSize1}
             fontSize={fontSize1}
             fontFamily="RoadUA-Medium"
           >
@@ -123,7 +123,7 @@ function B4Item({ params, x = 0, y = 0, transform }) {
         ))}
         <tspan
           x={textX}
-          y={120 + (firstLines.length - 1) * fontSize1}
+          y={115 - (20 * (96/76) - 20) + (firstLines.length - 1) * fontSize1}
           fontSize={fontSize2}
           fontFamily="RoadUA-Medium"
         >
