@@ -90,17 +90,17 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const baseFontSize2 = 20 / 0.7;
 
   let firstLines = [firstLineRaw];
-  let { size: fontSize1, ratio } = scaleFontToFit(firstLineRaw, `54px RoadUA-Medium`, 520, baseFontSize1);
+  let { size: fontSize1, ratio } = scaleFontToFit(firstLineRaw, "54px RoadUA-Medium", 520, baseFontSize1);
   if (ratio <= 0.8) {
     firstLines = splitText(firstLineRaw);
     const sizes = firstLines.map(line =>
-      scaleFontToFit(line, `54px RoadUA-Medium`, 520, baseFontSize1)
+      scaleFontToFit(line, "54px RoadUA-Medium", 520, baseFontSize1)
     );
     const minRatio = Math.min(...sizes.map(s => s.ratio));
     fontSize1 = baseFontSize1 * minRatio;
   }
 
-  const { size: fontSize2 } = scaleFontToFit(secondLineRaw, `28px RoadUA-Medium`, 520, baseFontSize2);
+  const { size: fontSize2 } = scaleFontToFit(secondLineRaw, "28px RoadUA-Medium", 520, baseFontSize2);
 
   const measuredText = measureText(firstLines.join(" "), `${fontSize1}px RoadUA-Medium`);
   const routeBadgeX = textX + measuredText.width + 20;
@@ -109,29 +109,28 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     <g transform={transform || `translate(${x}, ${y})`}>
       <rect x={xPadding} y={35} width={520} height={80} fill="white" />
 
-      {firstLines.map((line, i) => (
-        <text
-          key={i}
+      <text>
+        {firstLines.map((line, i) => (
+          <tspan
+            key={i}
+            x={textX}
+            y={30 + i * fontSize1}
+            fontSize={fontSize1}
+            dominantBaseline="hanging"
+            fontFamily="RoadUA-Medium"
+          >
+            {line}
+          </tspan>
+        ))}
+        <tspan
           x={textX}
-          y={30 + i * fontSize1}
-          fontSize={fontSize1}
+          y={120 + (firstLines.length - 1) * fontSize1}
+          fontSize={fontSize2}
+          dominantBaseline="text-after-edge"
           fontFamily="RoadUA-Medium"
-          fill="#0A0A0A"
-          dominantBaseline="hanging"
         >
-          {line}
-        </text>
-      ))}
-
-      <text
-        x={textX}
-        y={120 + (firstLines.length - 1) * fontSize1}
-        fontSize={fontSize2}
-        fontFamily="RoadUA-Medium"
-        fill="#0A0A0A"
-        dominantBaseline="text-after-edge"
-      >
-        {secondLineRaw}
+          {secondLineRaw}
+        </tspan>
       </text>
 
       {!params.hideArrow && (
