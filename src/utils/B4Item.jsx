@@ -4,7 +4,6 @@ import locationTerms from "../config/locationTerms";
 import measureText from "./measureText";
 import RouteBadgeGroup from "../components/svg/RouteBadgeGroup";
 
-// Масштабування шрифта відповідно до максимальної ширини
 function scaleFontToFit(text, font, maxWidth, baseSize) {
   const measured = measureText(text, font);
   if (measured.width <= maxWidth) return { size: baseSize, ratio: 1 };
@@ -13,7 +12,6 @@ function scaleFontToFit(text, font, maxWidth, baseSize) {
   return { size: baseSize * clampedRatio, ratio: clampedRatio };
 }
 
-// Розділення тексту на два рядки, якщо він надто довгий
 function splitText(text) {
   const words = text.split(" ");
   if (words.length < 2) return [text];
@@ -21,7 +19,6 @@ function splitText(text) {
   return [words.slice(0, half).join(" "), words.slice(half).join(" ")];
 }
 
-// Основний компонент В4-напрямку
 function B4Item({ params, x = 0, y = 0, transform }) {
   const xPadding = 40;
   const mainKey = params.mainText;
@@ -112,28 +109,29 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     <g transform={transform || `translate(${x}, ${y})`}>
       <rect x={xPadding} y={35} width={520} height={80} fill="white" />
 
-      <text>
-        {firstLines.map((line, i) => (
-          <tspan
-            key={i}
-            x={textX}
-            y={30 + i * fontSize1}
-            fontSize={fontSize1}
-            dominantBaseline="hanging"
-            fontFamily="RoadUA-Medium"
-          >
-            {line}
-          </tspan>
-        ))}
-        <tspan
+      {firstLines.map((line, i) => (
+        <text
+          key={i}
           x={textX}
-          y={120 + (firstLines.length - 1) * fontSize1}
-          fontSize={fontSize2}
-          dominantBaseline="text-after-edge"
+          y={30 + i * fontSize1}
+          fontSize={fontSize1}
           fontFamily="RoadUA-Medium"
+          fill="#0A0A0A"
+          dominantBaseline="hanging"
         >
-          {secondLineRaw}
-        </tspan>
+          {line}
+        </text>
+      ))}
+
+      <text
+        x={textX}
+        y={120 + (firstLines.length - 1) * fontSize1}
+        fontSize={fontSize2}
+        fontFamily="RoadUA-Medium"
+        fill="#0A0A0A"
+        dominantBaseline="text-after-edge"
+      >
+        {secondLineRaw}
       </text>
 
       {!params.hideArrow && (
