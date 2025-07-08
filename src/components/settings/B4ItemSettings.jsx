@@ -255,26 +255,30 @@ function B4ItemSettings({ label, params, setParams }) {
         <div className="pt-4">
           <p className="font-medium text-center mb-2">Додаткові позначки:</p>
           <div className="flex justify-center border rounded overflow-hidden w-fit mx-auto">
-            {["veloSTO", "veloParking", "empty"].map((key) => {
-              const icon = PathConfigs[key] ?? PathConfigs.veloSTO;
+            {[
+              { key: "showEurovelo", iconKey: "eurovelo" },
+              { key: "showVeloParking", iconKey: "veloParking" },
+              { key: "showVeloSTO", iconKey: "veloSTO" },
+            ].map(({ key, iconKey }) => {
+              const icon = PathConfigs[iconKey];
+              const isActive = params[key];
               return (
                 <button
                   key={key}
                   type="button"
-                  className="px-4 py-2 border-r last:border-r-0 bg-white hover:bg-gray-100"
+                  className={`px-4 py-2 border-r last:border-r-0 ${
+                    isActive ? "bg-blue-100" : "bg-white hover:bg-gray-100"
+                  }`}
+                  onClick={() => setParams({ ...params, [key]: !isActive })}
                 >
-                  {key !== "empty" ? (
-                    <svg
-                      width={24}
-                      height={24}
-                      viewBox={`0 0 ${icon.width} ${icon.height}`}
-                      className="text-gray-700 mx-auto"
-                    >
-                      <path d={icon.d} fill="currentColor" fillRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <div className="w-6 h-6" />
-                  )}
+                  <svg
+                    width={24}
+                    height={24}
+                    viewBox={`0 0 ${icon.width} ${icon.height}`}
+                    className="text-gray-700 mx-auto"
+                  >
+                    <path d={icon.d} fill="currentColor" fillRule="evenodd" />
+                  </svg>
                 </button>
               );
             })}

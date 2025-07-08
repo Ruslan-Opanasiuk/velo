@@ -1,4 +1,3 @@
-// config/ColorMap.js
 export const ColorMap = {
   table: {
     permanent: { bg: '#FFFFFF', fg: '#005187', textB2: '#FFFFFF' },

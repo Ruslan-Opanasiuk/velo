@@ -2,6 +2,7 @@ import transliterate from "./transliterate";
 import PathConfigs from "../config/PathConfigs";
 import locationTerms from "../config/locationTerms";
 import measureText from "./measureText";
+import RouteBadgeGroup from "../components/svg/RouteBadgeGroup";
 
 // Масштабування шрифта відповідно до максимальної ширини
 function scaleFontToFit(text, font, maxWidth, baseSize) {
@@ -86,6 +87,7 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const iconX = layout.iconX;
 
   let textX = 40;
+
   if (["left", "straight", "straight-left"].includes(params.direction)) {
     let arrowVisualWidth = 0;
     if (params.direction === "straight") arrowVisualWidth = arrow.width;
@@ -121,9 +123,10 @@ function B4Item({ params, x = 0, y = 0, transform }) {
 
   const { size: fontSize2 } = scaleFontToFit(secondLineRaw, `28px RoadUA-Medium`, maxWidth, baseFontSize2);
 
+
   return (
     <g transform={transform || `translate(${x}, ${y})`}>
-      <rect x={xPadding} y={35} width={520} height={80} fill="white" />
+      <rect x={xPadding} y={35} width={520} height={80} fill="green" />
 
       <text>
         {firstLines.map((line, i) => (
@@ -166,6 +169,13 @@ function B4Item({ params, x = 0, y = 0, transform }) {
           <path d={icon.d} fill="#000000" fillRule="evenodd" />
         </g>
       )}
+
+
+      <RouteBadgeGroup
+        params={{...params}}
+        x = {xPadding}
+        y = {35}      
+      />
     </g>
   );
 }

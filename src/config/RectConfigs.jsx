@@ -23,6 +23,24 @@ const RectConfigs = {
     outerRadius: 10.35,
     strokeWidth: 5.75
   },
+  E3B4text : {
+    outerHeight: 48,
+    outerWidth: 36,
+    outerRadius: 7.2,
+    strokeWidth: 3
+  },
+  E4B4text : {
+    outerHeight: 48,
+    outerWidth: 52,
+    outerRadius: 7.2,
+    strokeWidth: 3
+  },
+  euroveloB4text : {
+    outerHeight: 48,
+    outerWidth: 48,
+    outerRadius: 7.2,
+    strokeWidth: 3
+  }, 
   B1: {
     outerHeight: 300,
     outerWidth: 200,

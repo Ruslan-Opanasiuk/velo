@@ -163,7 +163,7 @@ function B4({ params }) {
         return (
           <B4Item
             key={index}
-            params={{ ...itemParams, hideArrow }}
+            params={{ ...params, ...itemParams, hideArrow }}
             x={0}
             y={b4ItemY(index)}
           />
@@ -177,6 +177,9 @@ function B4({ params }) {
       {showBlackLine && (
         <rect x={10} y={197} width={580} height={6} fill={"#000000"} />
       )}
+
+
+
     </svg>
   );
 }
