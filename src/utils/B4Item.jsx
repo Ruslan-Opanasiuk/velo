@@ -107,7 +107,7 @@ function B4Item({ params, x = 0, y = 0, transform }) {
 
   return (
     <g transform={transform || `translate(${x}, ${y})`}>
-      <rect x={xPadding} y={35} width={520} height={80} fill="green" />
+      <rect x={xPadding} y={35} width={520} height={80} fill="white" />
 
       <text>
         {firstLines.map((line, i) => (
