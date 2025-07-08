@@ -5,6 +5,46 @@ import RectRenderer from "../../utils/RectRenderer";
 import CircleRenderer from "../../utils/CircleRenderer";
 import { ColorMap } from "../../config/ColorMap";
 
+export function getRouteBadgeGroupWidth(params = {}) {
+  const spacing = 20;
+  const categoryToType = {
+    "Локальний": "local",
+    "Регіональний": "regional",
+    "Національний": "national",
+  };
+
+  const routeType = categoryToType[params.mainText];
+  const routeNumberValid = !!params.routeNumber;
+  const isDoubleDigit = +params.routeNumber >= 10;
+
+  let total = 0;
+
+  if (routeType && routeNumberValid) {
+    total += routeType === "national"
+      ? CircleConfigs["E5B4text"].outerRadius * 2
+      : isDoubleDigit
+        ? RectConfigs["E4B4text"].outerWidth
+        : RectConfigs["E3B4text"].outerWidth;
+    total += spacing;
+  }
+
+  if (params.showEurovelo) {
+    total += RectConfigs["euroveloB4text"].outerWidth + spacing;
+  }
+
+  if (params.showVeloParking) {
+    total += PathConfigs.veloParking.width * PathConfigs.veloParking.scale + spacing;
+  }
+
+  if (params.showVeloSTO) {
+    total += PathConfigs.veloSTO.width * PathConfigs.veloSTO.scale + spacing;;
+    // останнє spacing не додаємо
+  }
+
+  return total;
+}
+
+
 function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
   const { table, number } = ColorMap;
   const spacing = 20;

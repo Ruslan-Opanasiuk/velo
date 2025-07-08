@@ -2,7 +2,8 @@ import transliterate from "./transliterate";
 import PathConfigs from "../config/PathConfigs";
 import locationTerms from "../config/locationTerms";
 import measureText from "./measureText";
-import RouteBadgeGroup from "../components/svg/RouteBadgeGroup";
+import RouteBadgeGroup, { getRouteBadgeGroupWidth } from "../components/svg/RouteBadgeGroup";
+
 
 function scaleFontToFit(text, font, maxWidth, baseSize) {
   const measured = measureText(text, font);
@@ -89,18 +90,32 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const baseFontSize1 = 38 / 0.7;
   const baseFontSize2 = 20 / 0.7;
 
+  let arrowRightSpace = 0;
+
+  if (params.direction === "right") {
+    arrowRightSpace = arrow.height + 20;
+  } else if (params.direction === "straight-right") {
+    arrowRightSpace = 65.4 + 20;
+  }
+  const badgeGroupWidth = getRouteBadgeGroupWidth(params);
+
+  const availableTextWidth =
+    520 - (textX - xPadding) - arrowRightSpace - badgeGroupWidth;
+
+
+
   let firstLines = [firstLineRaw];
-  let { size: fontSize1, ratio } = scaleFontToFit(firstLineRaw, "54px RoadUA-Medium", 520, baseFontSize1);
+  let { size: fontSize1, ratio } = scaleFontToFit(firstLineRaw, "54px RoadUA-Medium", availableTextWidth, baseFontSize1);
   if (ratio <= 0.8) {
     firstLines = splitText(firstLineRaw);
     const sizes = firstLines.map(line =>
-      scaleFontToFit(line, "54px RoadUA-Medium", 520, baseFontSize1)
+      scaleFontToFit(line, "54px RoadUA-Medium", availableTextWidth, baseFontSize1)
     );
     const minRatio = Math.min(...sizes.map(s => s.ratio));
     fontSize1 = baseFontSize1 * minRatio;
   }
 
-  const { size: fontSize2 } = scaleFontToFit(secondLineRaw, "28px RoadUA-Medium", 520, baseFontSize2);
+  const { size: fontSize2 } = scaleFontToFit(secondLineRaw, "28px RoadUA-Medium", availableTextWidth, baseFontSize2);
 
   const measuredText = measureText(firstLines.join(" "), `${fontSize1}px RoadUA-Medium`);
   const routeBadgeX = textX + measuredText.width + 20;

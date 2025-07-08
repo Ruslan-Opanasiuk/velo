@@ -273,8 +273,9 @@ function B4ItemSettings({ label, params, setParams }) {
                 onClick={() => {
                   const activeKeys = ["showEurovelo", "showVeloParking", "showVeloSTO"].filter(k => params[k]);
                   const isTryingToAdd = !params[key];
+                  const maxAllowed = params.icon === "bicycleRoute" ? 1 : 2;
 
-                  if (isTryingToAdd && activeKeys.length >= 2) return;
+                  if (isTryingToAdd && activeKeys.length >= maxAllowed) return;
 
                   setParams({ ...params, [key]: !params[key] });
                 }}
