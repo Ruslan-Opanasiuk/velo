@@ -38,7 +38,6 @@ export function getRouteBadgeGroupWidth(params = {}) {
 
   if (params.showVeloSTO) {
     total += PathConfigs.veloSTO.width * PathConfigs.veloSTO.scale + spacing;;
-    // останнє spacing не додаємо
   }
 
   return total;

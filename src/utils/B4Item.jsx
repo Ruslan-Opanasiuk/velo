@@ -4,7 +4,6 @@ import locationTerms from "../config/locationTerms";
 import measureText from "./measureText";
 import RouteBadgeGroup, { getRouteBadgeGroupWidth } from "../components/svg/RouteBadgeGroup";
 
-
 // ============================================================================
 // ⬛ Функції для обробки тексту
 // ============================================================================
@@ -25,7 +24,6 @@ function splitText(text) {
   const half = Math.ceil(words.length / 2);
   return [words.slice(0, half).join(" "), words.slice(half).join(" ")];
 }
-
 
 // ============================================================================
 // ⬛ Основний компонент B4Item
@@ -62,14 +60,12 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     ? `${translit} ${rawLabel}`.trim()
     : translit || rawLabel || "";
 
-
   // --------------------------------------------------------------------------
   // 🟦 Налаштування іконки та стрілки
   // --------------------------------------------------------------------------
 
   const arrow = PathConfigs.smallArrow;
 
-  // Виправлення типу іконки в окремих випадках
   let iconKey = params.icon;
   if (iconKey === "streetNetwork" && params.isUrbanCenter) {
     iconKey = "cityCentre";
@@ -81,7 +77,6 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   }
 
   const icon = iconKey && PathConfigs[iconKey];
-
 
   // --------------------------------------------------------------------------
   // 🟦 Координати стрілки, іконки та тексту — залежно від напрямку
@@ -119,7 +114,6 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const { rotation, arrowX, iconX } = layout;
   const arrowY = 75 - arrow.height / 2;
 
-
   // --------------------------------------------------------------------------
   // 🟦 Обчислення позиції тексту
   // --------------------------------------------------------------------------
@@ -138,7 +132,6 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     textX += icon.width * icon.scale + 20;
   }
 
-
   // --------------------------------------------------------------------------
   // 🟦 Обробка шрифтів: масштабування, перенесення
   // --------------------------------------------------------------------------
@@ -153,28 +146,30 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const badgeGroupWidth = getRouteBadgeGroupWidth(params);
   const availableTextWidth = 520 - (textX - xPadding) - arrowRightSpace - badgeGroupWidth;
 
-  // Масштабуємо перший рядок, за потреби розбиваємо на 2 рядки
+
   let firstLines = [firstLineRaw];
-  let { size: fontSize1, ratio } = scaleFontToFit(firstLineRaw, "54px RoadUA-Medium", availableTextWidth, baseFontSize1);
-  if (ratio <= 0.8) {
+
+  // 🔹 Масштабуємо перший рядок
+  const fontCheck = scaleFontToFit(firstLineRaw, "54px RoadUA-Medium", availableTextWidth, baseFontSize1);
+
+  let fontSize1 = fontCheck.size;
+
+  if (fontCheck.ratio <= 0.8) {
+    // 🔹 Ділимо текст на два рядки
     firstLines = splitText(firstLineRaw);
 
-    // нова логіка: перший рядок — фіксовано зменшений на 30%, другий — динамічно
-    const fontSizeLine1 = baseFontSize1 * 0.7;
-    const { size: fontSizeLine2 } = scaleFontToFit(
-      firstLines[1],
-      "54px RoadUA-Medium",
-      availableTextWidth,
-      baseFontSize1
+    // 🔹 Масштабуємо кожен рядок, починаючи з уже зменшеного fontSize1
+    const sizes = firstLines.map(line =>
+      scaleFontToFit(line, "54px RoadUA-Medium", availableTextWidth, fontSize1)
     );
-    fontSize1 = [fontSizeLine1, fontSizeLine2];
+
+    const minRatio = Math.min(...sizes.map(s => s.ratio));
+    fontSize1 = fontSize1 * minRatio;
   }
 
   const { size: fontSize2 } = scaleFontToFit(secondLineRaw, "28px RoadUA-Medium", availableTextWidth, baseFontSize2);
-
-  const measuredText = measureText(firstLines.join(" "), `${Array.isArray(fontSize1) ? fontSize1[0] : fontSize1}px RoadUA-Medium`);
+  const measuredText = measureText(firstLines.join(" "), `${fontSize1}px RoadUA-Medium`);
   const routeBadgeX = textX + measuredText.width + 20;
-
 
   // --------------------------------------------------------------------------
   // 🟩 Рендер SVG
@@ -184,47 +179,56 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     <g transform={transform || `translate(${x}, ${y})`}>
 
       {/* Прямокутник-основа */}
-      {/* <rect x={xPadding} y={35} width={520} height={80} fill="green" /> */}
-      {/* <rect x={xPadding} y={74.5} width={520} height={1} fill="red" /> */}
+      {/* <rect x={xPadding} y={35} width={520} height={80} fill="green" />
+      <rect x={xPadding} y={74.5} width={520} height={1} fill="red" /> */}
 
       {/* Текст українською та англійською */}
-      <text>
-        {firstLines.map((line, i) => {
-          const isSplit = firstLines.length > 1;
-
-          // Обчислюємо Y динамічно:
-          const y = isSplit
-            ? 35 + 4 + i * (Array.isArray(fontSize1) ? fontSize1[i] : fontSize1) * 0.91 // для 2 рядків
-            : 35 + 38 + i * fontSize1; // для одного рядка
-
-          return (
-            <tspan
-              key={i}
-              x={textX}
-              y={y}
-              fontSize={Array.isArray(fontSize1) ? fontSize1[i] : fontSize1}
-              fontFamily="RoadUA-Medium"
-            >
-              {line}
-            </tspan>
-          );
-        })}
-
-        {/* Англійський рядок */}
-        <tspan
-          x={textX}
-          y={
-            firstLines.length > 1
-              ? 115 + 5 // для 2 рядків укр
-              : 115 - (20 * (96 / 76) - 20) // для 1 рядка укр
-          }
-          fontSize={fontSize2}
-          fontFamily="RoadUA-Medium"
-        >
-          {secondLineRaw}
-        </tspan>
-      </text>
-
+      {firstLines.length === 1 ? (
+        <text>
+          <tspan
+            x={textX}
+            y={35 + 38}
+            fontSize={fontSize1}
+            fontFamily="RoadUA-Medium"
+          >
+            {firstLines[0]}
+          </tspan>
+          <tspan
+            x={textX}
+            y={115 - (20 * (96 / 76) - 20)}
+            fontSize={fontSize2}
+            fontFamily="RoadUA-Medium"
+          >
+            {secondLineRaw}
+          </tspan>
+        </text>
+      ) : (
+        <text x={textX} fontFamily="RoadUA-Medium">
+          <tspan
+            x={textX}
+            y={35}
+            dominant-baseline="middle"
+            fontSize={fontSize1}
+          >
+            {firstLines[0]}
+          </tspan>
+          <tspan
+            x={textX}
+            y={75+(fontSize1*0.7)*0.5}
+            fontSize={fontSize1}
+          >
+            {firstLines[1]}
+          </tspan>
+          <tspan
+            x={textX}
+            y={115}
+            dominant-baseline="middle"
+            fontSize={fontSize2}
+          >
+            {secondLineRaw}
+          </tspan>
+        </text>
+      )}
 
       {/* Стрілка */}
       {!params.hideArrow && (
