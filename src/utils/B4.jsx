@@ -1,4 +1,3 @@
-import { useState } from "react";
 import RectRenderer from "./RectRenderer";
 import CircleRenderer from "./CircleRenderer";
 import B4Item from "./B4Item";
@@ -16,7 +15,9 @@ function B4({ params }) {
   // Отримуємо кольори фону та тексту з мапи
   const { table, number } = ColorMap;
   const { bg: tableBackground, fg: tableForeground } = table[params.tableType];
-  const { bg: badgeBackground, text: textColor } = number[params.numberType] || {};
+  const { bg: badgeBackground, text: defaultTextColor } = number[params.numberType] || {};
+  const textColor = params.tableType === "seasonal" ? "#F5C30D" : defaultTextColor || "#000000";
+
 
   const circleBadge = CircleConfigs["E5B4"];
   const isDoubleDigit = +params.routeNumber >= 10;
@@ -67,10 +68,11 @@ function B4({ params }) {
 
   return (
     <svg
-      width={outerRect.outerWidth}
-      height={outerRect.outerHeight}
+      width={outerRect.outerWidth+2}
+      height={outerRect.outerHeight+2}
       xmlns="http://www.w3.org/2000/svg"
     >
+      <g transform="translate(1,1)" style={{ filter: "drop-shadow(0 0 1px black)" }}>
       {/* Зовнішній білий контур */}
       <RectRenderer
         config={outerRect}
@@ -84,8 +86,8 @@ function B4({ params }) {
         config={innerRect}
         outerColor={"#000000"}
         innerColor={"#FFFFFF"}
-        x={5}
-        y={5}
+        x={7}
+        y={7}
       />
 
       {/* Верхня заокруглена частина */}
@@ -148,7 +150,7 @@ function B4({ params }) {
               dominantBaseline="middle"
               style={{ fontFeatureSettings: '"ss02"' }}
             >
-              {params.routeNumber}
+              {params.routeNumber} 
             </text>
           </g>
         )}
@@ -181,7 +183,7 @@ function B4({ params }) {
       )}
 
 
-
+      </g>
     </svg>
   );
 }

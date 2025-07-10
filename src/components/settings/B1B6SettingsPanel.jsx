@@ -1,82 +1,65 @@
+import PathConfigs from "../../config/PathConfigs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "../ui/select";
+
 function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNoneOption }) {
-  // Генерує список опцій для вибору рівня маршруту (тип номеру)
-  const getNumberTypeOptions = () => {
-    const options = [];
 
-    // Якщо дозволено, додаємо опцію "Немає"
-    if (allowNoneOption) {
-      options.push(<option key="none" value="none">Немає</option>);
-    }
 
-    // Опція "Національний" доступна, якщо маршрут не сезонний
-    if (params.tableType !== "seasonal") {
-      options.push(<option key="national" value="national">Національний</option>);
-    }
+// у компоненті
+const directionOptions = [
+  { value: "straight", label: "Прямо", icon: PathConfigs.smallArrow },
+  { value: "left", label: "Ліворуч", icon: PathConfigs.smallArrow },
+  { value: "right", label: "Праворуч", icon: PathConfigs.smallArrow },
+  { value: "straight-left", label: "Прямо і ліворуч", icon: PathConfigs.smallArrow },
+  { value: "straight-right", label: "Прямо і праворуч", icon: PathConfigs.smallArrow },
+];
 
-    // Для В2 показуємо одну комбіновану опцію
-    if (label.includes("В2")) {
-      options.push(<option key="regional-local" value="regional">Регіональний/Локальний</option>);
-    } else {
-      // Інакше додаємо окремо "Регіональний" та "Локальний"
-      options.push(
-        <option key="regional" value="regional">Регіональний</option>,
-        <option key="local" value="local">Локальний</option>
-      );
-    }
+const directionRotation = {
+  straight: 0,
+  left: -90,
+  right: 90,
+  "straight-left": -45,
+  "straight-right": 45,
+};
 
-    // Eurovelo дозволений тільки для постійних маршрутів, окрім В4-В6
-    if (params.tableType === "permanent" && !label.includes("В4") && !label.includes("В5") && !label.includes("В6")) {
-      options.push(<option key="eurovelo" value="eurovelo">Eurovelo 4</option>);
-    }
 
-    return options;
-  };
-
-  // Коли змінюється тип таблички (постійний, сезонний тощо)
-  const handleTableTypeChange = (e) => {
-    const tableType = e.target.value;
+  const handleTableTypeChange = (value) => {
     let numberType = params.numberType;
 
-    // Якщо вибрано сезонний тип — національний рівень не дозволений
-    if (tableType === "seasonal" && numberType === "national") {
-      numberType = "regional";
-    }
+    if (value === "seasonal" && numberType === "national") numberType = "regional";
+    if (value !== "permanent" && numberType === "eurovelo") numberType = "regional";
 
-    // Eurovelo доступний лише для постійних маршрутів
-    if (tableType !== "permanent" && numberType === "eurovelo") {
-      numberType = "regional";
-    }
-
-    setParams({ ...params, tableType, numberType });
+    setParams({ ...params, tableType: value, numberType });
   };
 
-  // Коли змінюється рівень маршруту (тип номеру)
-  const handleNumberTypeChange = (e) => {
-    const numberType = e.target.value;
-
-    // Автоматично підставляємо номер маршруту, якщо це Eurovelo (фіксовано 4)
-    // або очищаємо, якщо обрано "немає"
+  const handleNumberTypeChange = (value) => {
     const routeNumber =
-      numberType === "eurovelo" ? "4" :
-      numberType === "none" ? "" :
+      value === "eurovelo" ? "4" :
+      value === "none" ? "" :
       params.routeNumber;
 
-    setParams({ ...params, numberType, routeNumber });
+    setParams({ ...params, numberType: value, routeNumber });
   };
 
-  // Обробка зміни номера маршруту
   const handleRouteNumberChange = (e) => {
-    let value = e.target.value.replace(/\D/g, ""); // залишаємо лише цифри
-
-    if (value.startsWith("0")) value = value.slice(1); // прибираємо початкові нулі
-
-    if (params.numberType === "eurovelo") value = "4"; // якщо Eurovelo — фіксоване значення
-    else value = value.slice(0, 2); // максимум 2 цифри
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.startsWith("0")) value = value.slice(1);
+    if (params.numberType === "eurovelo") value = "4";
+    else value = value.slice(0, 2);
 
     setParams({ ...params, routeNumber: value });
   };
 
-  // Обробка вибору кількості напрямів (для В4)
+  const handleDirectionChange = (value) => {
+    setParams({ ...params, direction: value });
+  };
+
   const handleRouteCountChange = (count) => {
     const newItems = Array.from({ length: count }, (_, i) => {
       return params.b4Items?.[i] || {
@@ -89,92 +72,139 @@ function B1B6SettingsPanel({ label, params, setParams, enableDirection, allowNon
     setParams({ ...params, b4Items: newItems });
   };
 
+  const getNumberTypeOptions = () => {
+    const options = [];
+
+    if (allowNoneOption) options.push({ value: "none", label: "Немає" });
+    if (params.tableType !== "seasonal") options.push({ value: "national", label: "Національний" });
+
+    if (label.includes("В2")) {
+      options.push({ value: "regional", label: "Регіональний/Локальний" });
+    } else {
+      options.push({ value: "regional", label: "Регіональний" });
+      options.push({ value: "local", label: "Локальний" });
+    }
+
+    if (params.tableType === "permanent" && !label.includes("В4") && !label.includes("В5") && !label.includes("В6")) {
+      options.push({ value: "eurovelo", label: "Eurovelo 4" });
+    }
+
+    return options;
+  };
+
   return (
-    <div className="bg-white border border-gray-300 p-6 shadow-md">
-      <p className="text-xl font-semibold mb-4">{label}</p>
+    <div className="bg-white border border-gray-300 p-6 shadow-md w-fit">
+      <p className="text-xl font-semibold mb-6 text-center">{label}</p>
 
-      {/* Вибір типу таблички */}
-      <label className="block mb-4">
-        Призначення веломаршруту:
-        <select
-          value={params.tableType}
-          onChange={handleTableTypeChange}
-          className="w-full mt-1 p-2 border rounded"
-        >
-          <option value="permanent">Постійний</option>
-          <option value="seasonal">Сезонний</option>
-          <option value="temporary">Тимчасовий</option>
-        </select>
-      </label>
-
-      {/* Вибір рівня маршруту (тип номеру) */}
-      <label className="block mb-4">
-        Рівень веломаршруту:
-        <select
-          value={params.numberType}
-          onChange={handleNumberTypeChange}
-          className="w-full mt-1 p-2 border rounded"
-        >
-          {getNumberTypeOptions()}
-        </select>
-      </label>
-
-      {/* Введення номера маршруту — якщо опція не "немає" */}
-      {params.numberType !== "none" && (
-        <label className="block mb-4">
-          Номер маршруту:
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="\\d*"
-            value={params.routeNumber}
-            onChange={handleRouteNumberChange}
-            disabled={params.numberType === "eurovelo"} // Заборона редагування для Eurovelo
-            className="w-full mt-1 p-2 border rounded"
-            placeholder="Введіть цифру від 1 до 99"
-          />
-        </label>
-      )}
-
-      {/* Вибір напрямку, якщо це дозволено (для B1-B3) */}
-      {enableDirection && (
-        <label className="block">
-          Напрямок:
-          <select
-            value={params.direction}
-            onChange={(e) => setParams({ ...params, direction: e.target.value })}
-            className="w-full mt-1 p-2 border rounded"
-          >
-            <option value="straight">Прямо</option>
-            <option value="left">Ліворуч</option>
-            <option value="right">Праворуч</option>
-            <option value="straight-left">Прямо і ліворуч</option>
-            <option value="straight-right">Прямо і праворуч</option>
-          </select>
-        </label>
-      )}
-
-      {/* Вибір кількості точок інтересу — тільки для В4 */}
-      {label.includes("В4") && (
-        <div className="mt-4">
-          <p className="mb-1 font-medium">Кількість напрямків</p>
-          <div className="inline-flex border rounded overflow-hidden">
-            {[1, 2, 3].map((num) => (
-              <button
-                key={num}
-                onClick={() => handleRouteCountChange(num)}
-                className={`px-4 py-2 border-r last:border-r-0 ${
-                  params.b4Items?.length === num
-                    ? "bg-gray-300 font-semibold"
-                    : "bg-white hover:bg-gray-100"
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
+      <div className="space-y-4">
+        {/* Призначення веломаршруту */}
+        <div className="flex items-center gap-4">
+          <label className="w-48 font-medium">Тип таблички:</label>
+          <Select value={params.tableType} onValueChange={handleTableTypeChange}>
+            <SelectTrigger className="w-[260px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="permanent">Постійний</SelectItem>
+              <SelectItem value="seasonal">Сезонний</SelectItem>
+              <SelectItem value="temporary">Тимчасовий</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
+
+        {/* Рівень маршруту */}
+        <div className="flex items-center gap-4">
+          <label className="w-48 font-medium">Рівень маршруту:</label>
+          <Select value={params.numberType} onValueChange={handleNumberTypeChange}>
+            <SelectTrigger className="w-[260px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {getNumberTypeOptions().map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Номер маршруту */}
+        {params.numberType !== "none" && (
+          <div className="flex items-center gap-4">
+            <label className="w-48 font-medium">Номер маршруту:</label>
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="\d*"
+              value={params.routeNumber || ""}
+              onChange={handleRouteNumberChange}
+              disabled={params.numberType === "eurovelo"}
+              placeholder="Введіть цифру від 1 до 99"
+              className="w-[260px]"
+            />
+          </div>
+        )}
+
+        {/* Напрямок */}
+        {enableDirection && (
+          <div className="flex items-center gap-4">
+            <label className="w-48 font-medium">Напрямок:</label>
+            <Select value={params.direction} onValueChange={handleDirectionChange}>
+              <SelectTrigger className="w-[260px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {directionOptions.map(({ value, label, icon }) => {
+                  const rotation = directionRotation[value] || 0;
+                  return (
+                    <SelectItem key={value} value={value}>
+                      <div className="flex items-center gap-2">
+                        <svg
+                          width={24}
+                          height={24}
+                          viewBox={`0 0 ${icon.width} ${icon.height}`}
+                          className="text-gray-700"
+                        >
+                          <path
+                            d={icon.d}
+                            fill="currentColor"
+                            fillRule="evenodd"
+                            transform={`rotate(${rotation} ${icon.width / 2} ${icon.height / 2}) scale(${icon.scale})`}
+                          />
+                        </svg>
+                        <span>{label}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Кількість напрямків (для В4) */}
+        {label.includes("В4") && (
+          <div className="pt-4">
+            <p className="font-medium text-center mb-2">Кількість напрямків</p>
+            <div className="flex justify-center border rounded overflow-hidden w-fit mx-auto">
+              {[1, 2, 3].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => handleRouteCountChange(num)}
+                  className={`px-4 py-2 border-r last:border-r-0 ${
+                    params.b4Items?.length === num
+                      ? "bg-gray-300 font-semibold"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

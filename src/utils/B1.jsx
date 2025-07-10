@@ -35,10 +35,11 @@ function B1({ params }) {
 
   return (
     <svg
-      width={mainConfig.outerWidth}
-      height={mainConfig.outerHeight}
+      width={mainConfig.outerWidth+2}
+      height={mainConfig.outerHeight+2}
       xmlns="http://www.w3.org/2000/svg"
     >
+      <g transform="translate(1,1)" style={{ filter: "drop-shadow(0 0 1px black)" }}>
       <RectRenderer
         config={mainConfig}
         outerColor={params.tableType === "seasonal" ? "#FFFFFF" : tableBg}
@@ -98,6 +99,7 @@ function B1({ params }) {
         `}
       >
         <path d={PathConfigs.bigArrow.d} fill={tableBg} />
+      </g>
       </g>
     </svg>
   );

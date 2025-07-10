@@ -5,7 +5,7 @@ import B4 from "../utils/B4";
 
 function SignPreview({ signType, params }) {
   return (
-    <div className="border border-gray-300 p-6 bg-gray-300 shadow-md text-left">
+    <div className="p-6 text-left">
       {signType === "В1" && <B1 params={params} />}
       {signType === "В2" && <B2 params={params} />}
       {signType === "В3" && <B3 params={params} />}
@@ -17,5 +17,6 @@ function SignPreview({ signType, params }) {
     </div>
   );
 }
+
 
 export default SignPreview;

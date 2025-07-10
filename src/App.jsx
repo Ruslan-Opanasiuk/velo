@@ -107,6 +107,7 @@ function App() {
                 label={`Напрямок ${index + 1}`}
                 params={item}
                 setParams={(newItem) => updateB4Item(index, newItem)}
+                tableType={params.tableType}
               />
             ))}
         </div>

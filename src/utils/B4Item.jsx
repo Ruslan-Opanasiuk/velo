@@ -40,9 +40,21 @@ function B4Item({ params, x = 0, y = 0, transform }) {
   const translit = subInput ? transliterate(subInput) : "";
 
   const firstLineRaw = shortUa ? `${shortUa} ${original}`.trim() : original;
-  const secondLineRaw = translit && rawLabel
+  let secondLineRaw = "";
+
+if (params.icon === "bicycleRoute") {
+  const number = params.routeNumber ? ` ${params.routeNumber}` : "";
+  if (translit && rawLabel) {
+    secondLineRaw = `${translit} ${rawLabel}${number}`;
+  } else {
+    secondLineRaw = `${translit || rawLabel || ""}${number}`;
+  }
+} else {
+  secondLineRaw = translit && rawLabel
     ? `${translit} ${rawLabel}`.trim()
     : translit || rawLabel || "";
+}
+
 
   const arrow = PathConfigs.smallArrow;
 

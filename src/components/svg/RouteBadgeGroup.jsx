@@ -58,7 +58,8 @@ function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
   const routeNumberValid = !!params.routeNumber;
 
   const { bg: tableBackground } = table[params.tableType] || { bg: "#ffffff" };
-  const { bg: badgeBackground, text: textColor } = number[routeType] || {};
+  const { bg: badgeBackground, text: defaultTextColor } = number[routeType] || {};
+  const textColor = params.tableType === "seasonal" ? "#F5C30D" : defaultTextColor || "#000000";
 
   const isDoubleDigit = +params.routeNumber >= 10;
   const RectConfig = isDoubleDigit ? RectConfigs["E4B4text"] : RectConfigs["E3B4text"];
@@ -72,19 +73,29 @@ function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
         {routeType === "national" ? (
           <CircleRenderer
             config={CircleConfig}
-            outerColor={tableBackground}
+            outerColor={
+              params.tableType === "permanent" && routeType === "national"
+                ? badgeBackground
+                : tableBackground
+            }
             innerColor={badgeBackground}
             cx={CircleConfig.outerRadius}
             cy={CircleConfig.outerRadius}
           />
+
         ) : (
           <RectRenderer
             config={RectConfig}
-            outerColor={tableBackground}
+            outerColor={
+              params.tableType === "permanent" && (routeType === "local" || routeType === "regional")
+                ? badgeBackground // рамка стає того ж кольору, що й фон
+                : tableBackground // звичайна рамка
+            }
             innerColor={badgeBackground}
             x={0}
             y={0}
           />
+
         )}
         <text
           x={routeType === "national" ? CircleConfig.outerRadius : RectConfig.outerWidth / 2}

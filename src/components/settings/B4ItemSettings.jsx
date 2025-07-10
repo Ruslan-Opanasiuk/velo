@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import locationTerms from "../../config/locationTerms";
 import PathConfigs from "../../config/PathConfigs";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ import {
 } from "../ui/select";
 
 // Компонент налаштувань одного напрямку для В4
-function B4ItemSettings({ label, params, setParams, isTooLong}) {
+function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
   // Зміна напрямку
   const handleDirectionChange = (value) => {
     setParams({ ...params, direction: value });
@@ -62,6 +63,12 @@ function B4ItemSettings({ label, params, setParams, isTooLong}) {
     setParams({ ...params, customEn: e.target.value });
   };
 
+  useEffect(() => {
+  if (tableType === "seasonal" && params.mainText === "Національний") {
+    setParams({ ...params, mainText: "Регіональний" });
+  }
+}, [tableType, params.mainText]);
+
   const directions = [
     { value: "straight", label: "Прямо", icon: PathConfigs.smallArrow },
     { value: "left", label: "Ліворуч", icon: PathConfigs.smallArrow },
@@ -93,8 +100,13 @@ function B4ItemSettings({ label, params, setParams, isTooLong}) {
   }));
 
   const categoryOptions = params.icon && locationTerms[params.icon]
-    ? Object.keys(locationTerms[params.icon])
+    ? Object.keys(locationTerms[params.icon]).filter((key) => {
+        if (tableType === "seasonal" && key === "Національний") return false;
+        return true;
+      })
     : [];
+
+
 
   const isBicycleRoute = params.icon === "bicycleRoute" || params.mainText === "Веломаршрут";
   const shouldShowNameField =
