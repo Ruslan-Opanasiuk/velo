@@ -10,7 +10,7 @@ import {
 } from "../ui/select";
 
 // Компонент налаштувань одного напрямку для В4
-function B4ItemSettings({ label, params, setParams }) {
+function B4ItemSettings({ label, params, setParams, isTooLong}) {
   // Зміна напрямку
   const handleDirectionChange = (value) => {
     setParams({ ...params, direction: value });
@@ -247,6 +247,8 @@ function B4ItemSettings({ label, params, setParams }) {
               onChange={(e) => setParams({ ...params, subText: e.target.value })}
               placeholder="Введіть українську назву"
               className="w-[260px]"
+              disabled={isTooLong}
+              
             />
           </div>
         )}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import RectRenderer from "./RectRenderer";
 import CircleRenderer from "./CircleRenderer";
 import B4Item from "./B4Item";
@@ -166,6 +167,7 @@ function B4({ params }) {
             params={{ ...params, ...itemParams, hideArrow }}
             x={0}
             y={b4ItemY(index)}
+            onTooLong={(val) => updateTooLongFlag(index, val)}
           />
         );
       })}
