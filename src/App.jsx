@@ -104,6 +104,7 @@ function App() {
             params.b4Items.map((item, index) => (
               <B4ItemSettings
                 key={index}
+                index={index}
                 label={`Напрямок ${index + 1}`}
                 params={item}
                 setParams={(newItem) => updateB4Item(index, newItem)}

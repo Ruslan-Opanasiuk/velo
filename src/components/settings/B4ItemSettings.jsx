@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import locationTerms from "../../config/locationTerms";
 import PathConfigs from "../../config/PathConfigs";
@@ -10,14 +11,11 @@ import {
   SelectValue,
 } from "../ui/select";
 
-// Компонент налаштувань одного напрямку для В4
-function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
-  // Зміна напрямку
+function B4ItemSettings({ index, label, params, setParams, isTooLong, tableType }) {
   const handleDirectionChange = (value) => {
     setParams({ ...params, direction: value });
   };
 
-  // Зміна піктограми
   const handleIconChange = (value) => {
     const newIcon = value === "none" ? null : value;
     const isCenterOrRoute = newIcon === "cityCentre" || newIcon === "bicycleRoute";
@@ -32,7 +30,6 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
     });
   };
 
-  // Зміна категорії
   const handleMainTextChange = (value) => {
     const clearSubText = value === "Центр міста" || value === "Веломаршрут";
     setParams({
@@ -42,7 +39,6 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
     });
   };
 
-  // Зміна номера маршруту
   const handleRouteNumberChange = (e) => {
     let value = e.target.value.replace(/\D/g, "");
     if (value.startsWith("0")) value = value.slice(1);
@@ -50,32 +46,43 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
     setParams({ ...params, routeNumber: value });
   };
 
-  // Галочка "Є центром"
   const handleUrbanCenterToggle = (e) => {
     setParams({ ...params, isUrbanCenter: e.target.checked });
   };
 
-  // Введення власної назви
   const handleCustomUaChange = (e) => {
     setParams({ ...params, customUa: e.target.value });
   };
+  
   const handleCustomEnChange = (e) => {
     setParams({ ...params, customEn: e.target.value });
   };
+  
+  const handleTemporaryRouteToggle = (e) => {
+    setParams({ ...params, isTemporaryRoute: e.target.checked });
+  };
+
 
   useEffect(() => {
-  if (tableType === "seasonal" && params.mainText === "Національний") {
-    setParams({ ...params, mainText: "Регіональний" });
-  }
-}, [tableType, params.mainText]);
+    if (tableType === "seasonal" && params.mainText === "Національний") {
+      setParams({ ...params, mainText: "Регіональний" });
+    }
+  }, [tableType, params.mainText]);
 
-  const directions = [
+  const allDirections = [
     { value: "straight", label: "Прямо", icon: PathConfigs.smallArrow },
     { value: "left", label: "Ліворуч", icon: PathConfigs.smallArrow },
     { value: "right", label: "Праворуч", icon: PathConfigs.smallArrow },
     { value: "straight-left", label: "Прямо і ліворуч", icon: PathConfigs.smallArrow },
     { value: "straight-right", label: "Прямо і праворуч", icon: PathConfigs.smallArrow },
+    { value: "end", label: "Кінець маршруту", icon: null },
   ];
+
+  // ⬇️ Прибираємо "Кінець маршруту", якщо не перший елемент
+  const directions = index === 0
+    ? allDirections
+    : allDirections.filter((d) => d.value !== "end");
+
 
   const iconLabelsUa = {
     cityCentre: "Центр населеного пункту",
@@ -106,8 +113,6 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
       })
     : [];
 
-
-
   const isBicycleRoute = params.icon === "bicycleRoute" || params.mainText === "Веломаршрут";
   const shouldShowNameField =
     !isBicycleRoute && params.icon !== "cityCentre" &&
@@ -118,7 +123,6 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
       <p className="text-xl font-semibold mb-6 text-center">{label}</p>
 
       <div className="space-y-4">
-        {/* Напрямок */}
         <div className="flex items-center gap-4">
           <label className="w-48 font-medium">Напрямок:</label>
           <Select value={params.direction} onValueChange={handleDirectionChange}>
@@ -131,19 +135,23 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
                 return (
                   <SelectItem key={value} value={value}>
                     <div className="flex items-center gap-2">
-                      <svg
-                        width={24}
-                        height={24}
-                        viewBox={`0 0 ${icon.width} ${icon.height}`}
-                        className="text-gray-700"
-                      >
-                        <path
-                          d={icon.d}
-                          fill="currentColor"
-                          fillRule="evenodd"
-                          transform={`rotate(${rotation} ${icon.width / 2} ${icon.height / 2}) scale(${icon.scale})`}
-                        />
-                      </svg>
+                      {icon ? (
+                        <svg
+                          width={24}
+                          height={24}
+                          viewBox={`0 0 ${icon.width} ${icon.height}`}
+                          className="text-gray-700"
+                        >
+                          <path
+                            d={icon.d}
+                            fill="currentColor"
+                            fillRule="evenodd"
+                            transform={`rotate(${rotation} ${icon.width / 2} ${icon.height / 2}) scale(${icon.scale})`}
+                          />
+                        </svg>
+                      ) : (
+                        <span className="w-6 inline-block" />
+                      )}
                       <span>{label}</span>
                     </div>
                   </SelectItem>
@@ -153,7 +161,7 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
           </Select>
         </div>
 
-        {/* Піктограма */}
+                {/* Піктограма */}
         <div className="flex items-center gap-4">
           <label className="w-48 font-medium">Піктограма:</label>
           <Select value={params.icon ?? ""} onValueChange={handleIconChange}>
@@ -265,6 +273,18 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
           </div>
         )}
 
+        {/* Тимчасовий маршрут */}
+        <div className="flex items-center gap-2 ml-52">
+          <input
+            type="checkbox"
+            id="isTemporaryRoute"
+            checked={params.isTemporaryRoute || false}
+            onChange={handleTemporaryRouteToggle}
+          />
+          <label htmlFor="isTemporaryRoute" className="text-sm">Тимчасовий маршрут</label>
+        </div>
+
+
         {/* Додаткові позначки (іконки) */}
         <div className="pt-4">
         <p className="font-medium text-center mb-2">Додаткові позначки:</p>
@@ -307,7 +327,6 @@ function B4ItemSettings({ label, params, setParams, isTooLong, tableType}) {
           })}
         </div>
       </div>
-
       </div>
     </div>
   );
@@ -319,6 +338,7 @@ B4ItemSettings.directionLayout = {
   right: { rotation: 90 },
   "straight-left": { rotation: -45 },
   "straight-right": { rotation: 45 },
+  end: { rotation: 0 },
 };
 
 export default B4ItemSettings;

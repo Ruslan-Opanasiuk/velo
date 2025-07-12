@@ -3,7 +3,7 @@ import CircleConfigs from "../../config/CircleConfigs";
 import PathConfigs from "../../config/PathConfigs";
 import RectRenderer from "../../utils/RectRenderer";
 import CircleRenderer from "../../utils/CircleRenderer";
-import { ColorMap } from "../../config/ColorMap";
+import getColors from "../../config/colorConfig";
 
 export function getRouteBadgeGroupWidth(params = {}) {
   const spacing = 20;
@@ -37,15 +37,13 @@ export function getRouteBadgeGroupWidth(params = {}) {
   }
 
   if (params.showVeloSTO) {
-    total += PathConfigs.veloSTO.width * PathConfigs.veloSTO.scale + spacing;;
+    total += PathConfigs.veloSTO.width * PathConfigs.veloSTO.scale + spacing;
   }
 
   return total;
 }
 
-
 function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
-  const { table, number } = ColorMap;
   const spacing = 20;
   const elements = [];
 
@@ -56,10 +54,7 @@ function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
   };
   const routeType = categoryToType[params.mainText];
   const routeNumberValid = !!params.routeNumber;
-
-  const { bg: tableBackground } = table[params.tableType] || { bg: "#ffffff" };
-  const { bg: badgeBackground, text: defaultTextColor } = number[routeType] || {};
-  const textColor = params.tableType === "seasonal" ? "#F5C30D" : defaultTextColor || "#000000";
+  const colors = getColors(params.tableType, routeType, params.isTerminus, params.isTemporaryRoute);
 
   const isDoubleDigit = +params.routeNumber >= 10;
   const RectConfig = isDoubleDigit ? RectConfigs["E4B4text"] : RectConfigs["E3B4text"];
@@ -73,34 +68,24 @@ function RouteBadgeGroup({ params = {}, x = 0, y = 0 }) {
         {routeType === "national" ? (
           <CircleRenderer
             config={CircleConfig}
-            outerColor={
-              params.tableType === "permanent" && routeType === "national"
-                ? badgeBackground
-                : tableBackground
-            }
-            innerColor={badgeBackground}
+            outerColor={colors.routeBox.frame}
+            innerColor={colors.routeBox.background}
             cx={CircleConfig.outerRadius}
             cy={CircleConfig.outerRadius}
           />
-
         ) : (
           <RectRenderer
             config={RectConfig}
-            outerColor={
-              params.tableType === "permanent" && (routeType === "local" || routeType === "regional")
-                ? badgeBackground // рамка стає того ж кольору, що й фон
-                : tableBackground // звичайна рамка
-            }
-            innerColor={badgeBackground}
+            outerColor={colors.routeBox.frame}
+            innerColor={colors.routeBox.background}
             x={0}
             y={0}
           />
-
         )}
         <text
           x={routeType === "national" ? CircleConfig.outerRadius : RectConfig.outerWidth / 2}
           y={routeType === "national" ? CircleConfig.outerRadius + 3 : RectConfig.outerHeight / 2 + 3}
-          fill={textColor}
+          fill={colors.routeBox.text}
           fontSize={(routeType === "national" ? 22 : 25) / 0.7}
           fontFamily="RoadUA-Bold"
           textAnchor="middle"

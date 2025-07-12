@@ -2,34 +2,26 @@ import transliterate from "./transliterate";
 import PathConfigs from "../config/PathConfigs";
 import locationTerms from "../config/locationTerms";
 import measureText from "./measureText";
-import RouteBadgeGroup, { getRouteBadgeGroupWidth } from "../components/svg/RouteBadgeGroup";
+import RouteBadgeGroup, {
+  getRouteBadgeGroupWidth,
+} from "../components/svg/RouteBadgeGroup";
 
-// --- 📏 КОНСТАНТИ ДИЗАЙНУ ---
-
-// Базовий розмір основного шрифту (до масштабування)
+// === [0] КОНСТАНТИ ШРИФТУ ТА ПРОПОРЦІЙ ===
 const BASE_FONT_SIZE_PRIMARY = 38;
-// Базовий розмір допоміжного шрифту (другий рядок)
 const BASE_FONT_SIZE_SECONDARY = 20;
-// Коефіцієнт візуальної висоти тексту (справжня висота "Ву" замість baseline-to-baseline)
 const FONT_VISUAL_HEIGHT_COEFF = 96 / 76;
-// Візуальна ширина діагональної стрілки (для напрямків straight-left, straight-right)
-const DIAGONAL_ARROW_WIDTH = 65.4; // px
+const DIAGONAL_ARROW_WIDTH = 65.4;
 
-/**
- * Функція підбирає розмір шрифту так, щоб текст вмістився у вказану ширину
- */
+// === [1] АДАПТИВНЕ ЗМЕНШЕННЯ ШРИФТУ, якщо текст не влазить у доступну ширину ===
 function scaleFontToFit(text, font, maxWidth, baseSize, minRatio = 0.8) {
   const measured = measureText(text, font);
   if (measured.width <= maxWidth) return { size: baseSize, ratio: 1 };
-
   const scaleRatio = maxWidth / measured.width;
   const clampedRatio = Math.max(scaleRatio, minRatio);
   return { size: baseSize * clampedRatio, ratio: clampedRatio };
 }
 
-/**
- * Розбиває довгий текст на 2 приблизно рівні рядки
- */
+// === [2] РОЗБИТТЯ ДОВГОГО ТЕКСТУ НА ДВА РЯДКИ (посередині) ===
 function splitText(text) {
   const words = text.split(" ");
   if (words.length < 2) return [text];
@@ -37,71 +29,87 @@ function splitText(text) {
   return [words.slice(0, half).join(" "), words.slice(half).join(" ")];
 }
 
-function B4Item({ params, x = 0, y = 0, transform }) {
+// === [3] ОСНОВНИЙ SVG-КОМПОНЕНТ ЕЛЕМЕНТА B4 ===
+function B4Item({ params, x = 0, y = 0, transform, isLast = false, index = 0 }) {
+  // === [3.1] ПРОВІРКИ СПЕЦИФІЧНИХ УМОВ ===
+  // Визначаємо, чи потрібно показати жовтий фон для тимчасового маршруту
+  const shouldShowTemporaryBg = params.isTemporaryRoute === true;
+  const TEMP_COLOR = "#F5C30D";
 
-  // --- 1. ПІДГОТОВКА ТЕКСТОВИХ ДАНИХ ---
+  // Визначаємо, чи це початок маршруту (перший пункт з напрямком "end")
+  const isEndRoute = params.direction === "end" && index === 0;
 
+  // === [3.2] ФОРМУВАННЯ ТЕКСТОВИХ МІТКИ ===
+  // Отримуємо ключ основної мітки та підрядка
   const mainKey = params.mainText;
   const subText = params.subText || "";
+
+  // Транслітерація підрядка для англійської мітки
   const translit = subText ? transliterate(subText) : "";
 
+  // Основні тексти українською та англійською
   let labelUa = "";
   let labelEn = "";
 
+  // Якщо іконка — "other", використовуємо кастомні назви
   if (params.icon === "other") {
     labelUa = params.customUa || "";
     labelEn = params.customEn || "";
-  } else if (params.icon && mainKey && locationTerms[params.icon]?.[mainKey]) {
+  }
+  // Інакше — беремо відповідні назви з locationTerms
+  else if (params.icon && mainKey && locationTerms[params.icon]?.[mainKey]) {
     const entry = locationTerms[params.icon][mainKey];
     labelUa = entry.ua ?? "";
     labelEn = entry.en ?? "";
   }
 
+  // === [3.3] СКЛАДАННЯ ТЕКСТОВИХ РЯДКІВ ===
+  // 🔹 Головний рядок: українська назва + subText
   const mainTextLineRaw = labelUa ? `${labelUa} ${subText}`.trim() : subText;
 
+  // 🔹 Другий рядок (англійський): транслітерація + EN
   let secondaryLine = "";
   if (params.icon === "bicycleRoute") {
+    // Якщо велосипедний маршрут — додаємо номер
     const number = params.routeNumber ? ` ${params.routeNumber}` : "";
     secondaryLine = [translit, labelEn].filter(Boolean).join(" ") + number;
   } else {
     secondaryLine = [translit, labelEn].filter(Boolean).join(" ");
   }
 
-  // --- 2. ОБРОБКА ІКОНКИ ---
-
+  // === [3.4] ВИЗНАЧЕННЯ ІКОНКИ З КОНФІГІВ ===
   let iconKey = params.icon;
 
+  // Спеціальна обробка: якщо "streetNetwork" та "isUrbanCenter", то показуємо "cityCentre"
   if (iconKey === "streetNetwork" && params.isUrbanCenter) {
     iconKey = "cityCentre";
   }
 
+  // Якщо іконка не задана — пробуємо визначити з типу номера маршруту
   if (!iconKey) {
     switch (params.numberType) {
       case "veloSTO":
-        iconKey = "veloSTO";
-        break;
       case "veloParking":
-        iconKey = "veloParking";
-        break;
       case "eurovelo":
-        iconKey = "eurovelo";
+        iconKey = params.numberType;
         break;
     }
   }
 
   const icon = iconKey && PathConfigs[iconKey];
 
-  // --- 3. РОЗТАШУВАННЯ СТРІЛКИ ТА ІКОНКИ ---
-
+  // === [3.5] ЛЕЯУТ: КООРДИНАТИ СТРІЛОК, ІКОНОК, ТЕКСТУ ===
   const xPadding = 40;
   const arrow = PathConfigs.smallArrow;
+
+  // Параметри для різних напрямків
   const directionLayout = {
-    "left": {
+    left: {
       rotation: -90,
       arrowX: xPadding + (arrow.height - arrow.width) / 2,
       iconX: xPadding + arrow.height + 20,
     },
-    "straight": {
+    straight: {
       rotation: 0,
       arrowX: xPadding,
       iconX: xPadding + arrow.width + 20,
@@ -111,7 +119,7 @@ function B4Item({ params, x = 0, y = 0, transform }) {
       arrowX: xPadding - 3,
       iconX: xPadding + DIAGONAL_ARROW_WIDTH + 20,
     },
-    "right": {
+    right: {
       rotation: 90,
       arrowX: 560 - arrow.width - (arrow.height - arrow.width) / 2,
       iconX: xPadding,
@@ -123,100 +131,135 @@ function B4Item({ params, x = 0, y = 0, transform }) {
     },
   };
 
-  const layout = directionLayout[params.direction || "straight"];
-  const { rotation, arrowX, iconX } = layout;
+  const layout = directionLayout[params.direction] || {};
+  const rotation = layout.rotation || 0;
+  const arrowX = layout.arrowX || 0;
+  const iconX = layout.iconX || xPadding;
   const arrowY = 75 - arrow.height / 2;
 
-  // --- 4. ПОЗИЦІОНУВАННЯ ТЕКСТУ ---
-
+  // === [3.6] ОБЧИСЛЕННЯ textX — координати початку тексту ===
   let textX = xPadding;
 
+  // Додаємо ширину стрілки (якщо вона зліва)
   if (["left", "straight", "straight-left"].includes(params.direction)) {
-    let arrowVisualWidth = 0;
-
-    if (params.direction === "straight") arrowVisualWidth = arrow.width;
-    else if (params.direction === "left") arrowVisualWidth = arrow.height;
-    else if (params.direction === "straight-left") arrowVisualWidth = DIAGONAL_ARROW_WIDTH;
+    const arrowVisualWidth = {
+      straight: arrow.width,
+      left: arrow.height,
+      "straight-left": DIAGONAL_ARROW_WIDTH,
+    }[params.direction] || 0;
 
     textX = arrowX + arrowVisualWidth + 20;
   }
 
+  // Додаємо ширину іконки
   if (icon) {
     textX += icon.width * icon.scale + 20;
   }
 
-  // --- 5. ОБЧИСЛЕННЯ ДОСТУПНОЇ ШИРИНИ ТА ШРИФТІВ ---
-
+  // === [3.7] ДОСТУПНА ШИРИНА ТЕКСТОВОГО БЛОКУ ===
   const baseFontSize1 = BASE_FONT_SIZE_PRIMARY / 0.7;
   const baseFontSize2 = BASE_FONT_SIZE_SECONDARY / 0.7;
 
-  let arrowRightSpace = 0;
-  if (params.direction === "right") {
-    arrowRightSpace = arrow.height + 20;
-  } else if (params.direction === "straight-right") {
-    arrowRightSpace = DIAGONAL_ARROW_WIDTH + 20;
-  }
+  const arrowRightSpace = ["right", "straight-right"].includes(params.direction)
+    ? (params.direction === "right" ? arrow.height : DIAGONAL_ARROW_WIDTH) + 20
+    : 0;
 
   const badgeGroupWidth = getRouteBadgeGroupWidth(params);
 
-  const availableTextWidth =
+  const availableTextWidthMain =
     520 - (textX - xPadding) - arrowRightSpace - badgeGroupWidth;
 
-  // --- 6. ОБРОБКА ПЕРШОГО РЯДКА (1 або 2 рядки) ---
+  const availableTextWidthSecondary =
+    520 - (textX - xPadding) - arrowRightSpace;
 
+  // === [3.8] АДАПТИВНИЙ РОЗМІР ШРИФТУ, МОЖЛИВИЙ ПЕРЕНОС НА 2 РЯДКИ ===
   let mainTextLines;
   let fontSize1;
 
-  const singleLineRatio = scaleFontToFit(
+  const { ratio: singleLineRatio } = scaleFontToFit(
     mainTextLineRaw,
     "54px RoadUA-Medium",
-    availableTextWidth,
+    availableTextWidthMain,
     baseFontSize1,
     0
-  ).ratio;
+  );
 
   if (singleLineRatio >= 0.8) {
+    // Якщо текст вміщується в один рядок — лишаємо так
     mainTextLines = [mainTextLineRaw];
     fontSize1 = baseFontSize1 * Math.min(singleLineRatio, 1);
   } else {
+    // Інакше розбиваємо на два рядки, підганяємо шрифт
     mainTextLines = splitText(mainTextLineRaw);
-
     const adjustedRatio = Math.min(
-      scaleFontToFit(mainTextLines[0], "54px RoadUA-Medium", availableTextWidth, baseFontSize1, 0).ratio,
-      scaleFontToFit(mainTextLines[1], "54px RoadUA-Medium", availableTextWidth, baseFontSize1, 0).ratio
+      scaleFontToFit(
+        mainTextLines[0],
+        "54px RoadUA-Medium",
+        availableTextWidthMain,
+        baseFontSize1,
+        0
+      ).ratio,
+      scaleFontToFit(
+        mainTextLines[1],
+        "54px RoadUA-Medium",
+        availableTextWidthMain,
+        baseFontSize1,
+        0
+      ).ratio
     );
-
     fontSize1 = baseFontSize1 * Math.min(0.8, Math.max(adjustedRatio, 0.7));
   }
 
-  const { size: fontSize2 } = scaleFontToFit(secondaryLine, "28px RoadUA-Medium", availableTextWidth, baseFontSize2);
+  const { size: fontSize2 } = scaleFontToFit(
+    secondaryLine,
+    "28px RoadUA-Medium",
+    availableTextWidthSecondary,
+    baseFontSize2
+  );
 
-  // --- 7. РОЗМІРИ ТЕКСТУ, ДЛЯ РОЗТАШУВАННЯ БЕЙДЖІВ ---
-
-  const measuredLines = mainTextLines.map(line =>
+  // === [3.9] ДОДАТКОВІ ОБЧИСЛЕННЯ: ширина тексту, бейдж, хвилі ===
+  const measuredLines = mainTextLines.map((line) =>
     measureText(line, `${fontSize1}px RoadUA-Medium`)
   );
-  const maxTextWidth = Math.max(...measuredLines.map(m => m.width));
+  const maxTextWidth = Math.max(...measuredLines.map((m) => m.width));
   const routeBadgeX = textX + maxTextWidth + 20;
-
-  // --- 8. ДЕКОРАТИВНІ ХВИЛІ ДЛЯ ВОДИ ---
 
   const showWave = params.icon === "water";
   const waves = PathConfigs.waves;
   const waveWidth = waves.width * waves.scale;
-  const waveCount = showWave ? Math.ceil(maxTextWidth / waveWidth) : 0;
+  const waveAreaWidth = Math.min(maxTextWidth, availableTextWidthMain);
+  const waveCount = showWave ? Math.floor(waveAreaWidth / waveWidth) : 0;
 
   const yShiftText = fontSize1 * 0.7 * FONT_VISUAL_HEIGHT_COEFF - fontSize1 * 0.7;
   const applyYShift = showWave ? yShiftText : 0;
 
-  // --- 9. РЕНДЕР SVG З ЕЛЕМЕНТАМИ ---
-
+  // === [4] РЕНДЕР SVG ===
   return (
     <g transform={transform || `translate(${x}, ${y})`}>
+      {/* === [4.1] Тимчасовий жовтий фон === */}
+      {shouldShowTemporaryBg &&
+        (isLast ? (
+          <path
+            d={PathConfigs.temporaryRouteFooterBg.d}
+            fill={TEMP_COLOR}
+            fillRule="evenodd"
+          />
+        ) : (
+          <rect x={10} y={0} width={580} height={150} fill={TEMP_COLOR} />
+        ))}
 
-      <rect x={xPadding} y={35} width={520} height={80} fill="green" />
-      
-      {/* ТЕКСТ */}
+      {/* === [4.2] Стрічка "кінець маршруту" (червона) === */}
+      {isEndRoute && (
+        <g
+          transform={`translate(${params.b4Items?.length === 1 ? 31 : 0}, ${
+            params.b4Items?.length === 1 ? -10 : 0
+          }) scale(1)`}
+        >
+          <path d={PathConfigs.stripeBig.d} fill="#CC0000" fillRule="evenodd" />
+        </g>
+      )}
+
+      {/* === [4.3] Основний текст (1 або 2 рядки + англійська назва) === */}
       {mainTextLines.length === 1 ? (
         <text>
           <tspan
@@ -250,29 +293,29 @@ function B4Item({ params, x = 0, y = 0, transform }) {
         </text>
       )}
 
-      {/* СТРІЛКА */}
-      {!params.hideArrow && (
+      {/* === [4.4] Стрілка напрямку (окрім "end") === */}
+      {params.direction !== "end" && !params.hideArrow && (
         <g
-          transform={`
-            translate(${arrowX}, ${arrowY})
-            rotate(${rotation} ${arrow.width / 2} ${arrow.height / 2})
-            scale(${arrow.scale})
-          `}
+          transform={`translate(${arrowX}, ${arrowY}) rotate(${rotation} ${
+            arrow.width / 2
+          } ${arrow.height / 2}) scale(${arrow.scale})`}
         >
           <path d={arrow.d} fill="black" />
         </g>
       )}
 
-      {/* ІКОНКА */}
+      {/* === [4.5] Іконка типу маршруту (якщо є) === */}
       {icon && (
         <g
-          transform={`translate(${iconX}, ${75 - icon.height * icon.scale / 2}) scale(${icon.scale})`}
+          transform={`translate(${iconX}, ${
+            75 - (icon.height * icon.scale) / 2
+          }) scale(${icon.scale})`}
         >
           <path d={icon.d} fill="#000000" fillRule="evenodd" />
         </g>
       )}
 
-      {/* ХВИЛІ */}
+      {/* === [4.6] Хвильки для водного маршруту === */}
       {showWave && (
         <g transform={`translate(${textX}, 108)`}>
           {Array.from({ length: waveCount }).map((_, i) => (
@@ -286,8 +329,14 @@ function B4Item({ params, x = 0, y = 0, transform }) {
         </g>
       )}
 
-      {/* БЕЙДЖІ */}
-      <RouteBadgeGroup params={{ ...params }} x={routeBadgeX} y={35} />
+      {/* === [4.7] Група бейджів маршруту === */}
+      <RouteBadgeGroup params={{ 
+        ...params, 
+        isTerminus: isEndRoute, 
+        isTemporaryRoute: shouldShowTemporaryBg }} 
+        x={routeBadgeX} 
+        y={35} />
+
     </g>
   );
 }
